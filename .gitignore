@@ -1,5 +1,8 @@
 venv/
+path/to/venv/
 __pycache__/
 *.pyc
 .env
 .DS_Store
+venv/
+path/to/venv/
