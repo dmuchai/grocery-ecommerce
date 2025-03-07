@@ -24,13 +24,14 @@ function displaySearchResults(results) {
     }
 
     results.products.forEach(product => {
+	let imageUrl = product.image_url ? `/static/images/${product.image_url}` : "/static/images/default.jpg";
         let productCard = `
             <div class="card mb-3">
-                <img src="${product.image_url}" class="card-img-top" alt="${product.name}">
+                <img src="${imageUrl}" class="card-img-top" alt="${product.name}">
                 <div class="card-body">
                     <h5 class="card-title">${product.name}</h5>
                     <p class="card-text">${product.description}</p>
-                    <p class="text-success"><strong>$${parseFloat(product.price).toFixed(2)}</strong></p>
+                    <p class="text-success"><strong>Kshs ${parseFloat(product.price).toFixed(2)}</strong></p>
                     <button class="btn btn-success">Add to Cart</button>
                 </div>
             </div>
