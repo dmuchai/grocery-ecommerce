@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Your Shopping Cart</h1>
+    <div id="cart-items"></div>
+    <button id="checkout-btn">Proceed to Checkout</button>
+
+    <script>
+        $(document).ready(function() {
+            function loadCart() {
+                $.get("/cart", function(data) {
+                    let cartHtml = "";
+                    $.each(data, function(productId, item) {
+                        cartHtml += `
+                            <div>
+                                <h2>${item.name}</h2>
+                                <img src="${item.image_url}" width="100">
+                                <p>Price: Kshs ${item.price}</p>
+                                <p>Quantity: ${item.quantity}</p>
+                                <button onclick="removeFromCart(${productId})">Remove</button>
+                            </div>
+                        `;
+                    });
+                    $("#cart-items").html(cartHtml);
+                });
+            }
+
+            function removeFromCart(productId) {
+                $.ajax({
+                    url: `/cart/remove/${productId}`,
+                    type: "DELETE",
+                    success: function(response) {
+                        loadCart();
+                    }
+                });
+            }
+
+            $("#checkout-btn").click(function() {
+                window.location.href = "/checkout";
+            });
+
+            loadCart();
+        });
+    </script>
+</body>
+</html>

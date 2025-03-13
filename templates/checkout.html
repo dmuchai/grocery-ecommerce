@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Checkout</h1>
+    <form id="checkout-form">
+        <label>Name:</label>
+        <input type="text" id="customer_name" required><br>
+
+        <label>Address:</label>
+        <input type="text" id="address" required><br>
+
+        <button type="submit">Place Order</button>
+    </form>
+
+    <script>
+        $("#checkout-form").submit(function(event) {
+            event.preventDefault();
+            const orderData = {
+                customer_name: $("#customer_name").val(),
+                address: $("#address").val()
+            };
+
+            $.post("/checkout", JSON.stringify(orderData), function(response) {
+                alert(response.message);
+                window.location.href = "/orders";
+            }, "json").fail(function(response) {
+                alert("Error: " + response.responseJSON.error);
+            });
+        });
+    </script>
+</body>
+</html>

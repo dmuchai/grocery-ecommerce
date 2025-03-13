@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Your Order History</h1>
+    <div id="order-list"></div>
+
+    <script>
+        $(document).ready(function() {
+            $.get("/orders", function(data) {
+                let ordersHtml = "";
+                data.orders.forEach(order => {
+                    ordersHtml += `
+                        <div>
+                            <h3>Order #${order.id}</h3>
+                            <p>Name: ${order.customer_name}</p>
+                            <p>Address: ${order.address}</p>
+                            <p>Total: Kshs ${order.total_price}</p>
+                        </div>
+                    `;
+                });
+                $("#order-list").html(ordersHtml);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -18,13 +18,13 @@ function displaySearchResults(results) {
     let resultsContainer = document.getElementById("searchResults");
     resultsContainer.innerHTML = "";
 
-    if (results.products.length === 0) {
+    if (results.length === 0) {
         resultsContainer.innerHTML = "<p>No products found.</p>";
         return;
     }
 
-    results.products.forEach(product => {
-	let imageUrl = product.image_url ? `/static/images/${product.image_url}` : "/static/images/default.jpg";
+    results.forEach(product => {
+	let imageUrl = product.image_url ? product.image_url : "/static/images/default.jpg";
         let productCard = `
             <div class="card mb-3">
                 <img src="${imageUrl}" class="card-img-top" alt="${product.name}">
