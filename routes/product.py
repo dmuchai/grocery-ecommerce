@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from models import db
 from models.product import Product
 
@@ -8,8 +8,17 @@ product_bp = Blueprint('product', __name__, url_prefix='/products')
 # GET all products
 @product_bp.route('/', methods=['GET'])
 def get_all_products():
-    product = Product.query.all()
-    return jsonify({'product': [p.to_dict() for p in product]}), 200
+    products_data = Product.query.all()
+    products_list = [
+            {
+                "id": product.id,
+                "name": product.name,
+                "description": product.description,
+                "price": float(product.price),
+                "image_url": f"/static/images/{product.image_url}"
+            } for product in products_data
+    ]           
+    return render_template('products.html', products=products_list)
 
 # GET a single product by ID
 @product_bp.route('/<int:product_id>', methods=['GET'])
@@ -17,7 +26,16 @@ def get_product_by_id(product_id):
     product = Product.query.get(product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
-    return jsonify(product.to_dict()), 200
+    product_data = {
+            "id": product.id,
+            "name": product.name,
+            "description": product.description,
+            "price": float(product.price),
+            "image_url": f"/static/images/{product.image_url}" if not product.image_url.startswith("/static/") else product.image_url,
+            "in_stock": product.stock > 0
+    }
+    
+    return render_template('product_detail.html', product=product_data)
 
 # POST a new product
 @product_bp.route('/', methods=['POST'])

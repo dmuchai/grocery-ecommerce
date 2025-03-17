@@ -3,50 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart</title>
+    <title>Your Cart - Denncathy Fresh Basket</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Your Shopping Cart</h1>
-    <div id="cart-items"></div>
-    <button id="checkout-btn">Proceed to Checkout</button>
 
-    <script>
-        $(document).ready(function() {
-            function loadCart() {
-                $.get("/cart", function(data) {
-                    let cartHtml = "";
-                    $.each(data, function(productId, item) {
-                        cartHtml += `
-                            <div>
-                                <h2>${item.name}</h2>
-                                <img src="${item.image_url}" width="100">
-                                <p>Price: Kshs ${item.price}</p>
-                                <p>Quantity: ${item.quantity}</p>
-                                <button onclick="removeFromCart(${productId})">Remove</button>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">Denncathy Fresh Basket</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/cart">Cart (<span id="cart-count">0</span>)</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Cart Content -->
+<div class="container mt-5">
+    <h2 class="mb-4">🛒 Your Shopping Cart</h2>
+
+    <div id="cart-container">
+        <p>Loading cart...</p>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="mt-4 p-3 border rounded" id="cart-summary" style="display: none;">
+        <h4>Total: <span id="cart-total">Kshs 0.00</span></h4>
+        <a href="/products" class="btn btn-outline-secondary">🛒 Continue Shopping</a>
+        <a href="/checkout" class="btn btn-success" id="checkout-btn">✅ Proceed to Checkout</a>
+        <button class="btn btn-danger" id="clear-cart">🗑️ Clear Cart</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        function fetchCart() {
+            $.get("/cart", function (data) {
+                let cart = data.cart;
+                let totalPrice = data.total;
+                let cartHtml = "";
+
+                if (cart.length === 0) {
+                    $("#cart-container").html("<p>Your cart is empty. <a href='/products'>Start shopping</a>.</p>");
+                    $("#cart-summary").hide();
+                    $("#cart-count").text("0");
+                    return;
+                }
+
+                cart.forEach((item) => {
+                    let subtotal = item.price * item.quantity;
+		    let imageUrl = `/static/images/${item.image_url}`;
+
+                    cartHtml += `
+                        <div class="row border-bottom py-2">
+                            <div class="col-md-2"><img src="${imageUrl}" class="img-fluid" alt="${item.name}"></div>
+                            <div class="col-md-3"><h5>${item.name}</h5></div>
+                            <div class="col-md-2">Kshs ${item.price.toFixed(2)}</div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-outline-secondary change-qty" data-id="${item.id}" data-change="-1">-</button>
+                                <span class="mx-2">${item.quantity}</span>
+                                <button class="btn btn-sm btn-outline-secondary change-qty" data-id="${item.id}" data-change="1">+</button>
                             </div>
-                        `;
-                    });
-                    $("#cart-items").html(cartHtml);
+                            <div class="col-md-2">Kshs ${subtotal.toFixed(2)}</div>
+                            <div class="col-md-1">
+                                <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">❌</button>
+                            </div>
+                        </div>
+                    `;
                 });
-            }
 
-            function removeFromCart(productId) {
-                $.ajax({
-                    url: `/cart/remove/${productId}`,
-                    type: "DELETE",
-                    success: function(response) {
-                        loadCart();
-                    }
-                });
-            }
-
-            $("#checkout-btn").click(function() {
-                window.location.href = "/checkout";
+                $("#cart-container").html(cartHtml);
+                $("#cart-total").text(`Kshs ${totalPrice.toFixed(2)}`);
+                $("#cart-summary").show();
+                $("#cart-count").text(cart.length);
             });
+        }
 
-            loadCart();
+        // Change quantity
+        $(document).on("click", ".change-qty", function () {
+            let productId = $(this).data("id");
+            let change = $(this).data("change");
+
+            $.ajax({
+                url: "/cart/add",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ product_id: productId, quantity: change }),
+                success: function () {
+                    fetchCart(); // Reload cart after update
+                }
+            });
         });
-    </script>
+
+        // Remove item
+        $(document).on("click", ".remove-item", function () {
+            let productId = $(this).data("id");
+
+            $.ajax({
+                url: `/cart/remove/${productId}`,
+                type: "POST",
+                success: function () {
+                    fetchCart(); // Reload cart after removal
+                }
+            });
+        });
+
+        // Clear entire cart
+        $("#clear-cart").on("click", function () {
+            $.ajax({
+                url: "/cart/clear",
+                type: "POST",
+                success: function () {
+                    fetchCart(); // Reload cart after clearing
+                }
+            });
+        });
+
+        fetchCart(); // Load cart on page load
+    });
+</script>
+
 </body>
 </html>

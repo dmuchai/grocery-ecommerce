@@ -1,63 +1,70 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, render_template
 from models import db
 from models.product import Product
 
 cart_bp = Blueprint('cart', __name__, url_prefix='/cart')
 
-# Ensure session is configured properly in app.py
+@cart_bp.before_request
+def initialize_cart():
+    if 'cart' not in session:
+        session['cart'] = []
+
 @cart_bp.route('/', methods=['GET'])
 def get_cart():
-    cart = session.get('cart', {})
-    return jsonify({'cart': cart, 'total_items': sum(item['quantity'] for item in cart.values())}), 200
+    cart = session.get('cart', [])
+    total = sum(item['price'] * item['quantity'] for item in cart)
+    for item in cart:
+        product = Product.query.get(item["id"])
+        item["image_url"] = product.image_url if product else "default.jpg"
 
-# ADD item to cart
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'cart': cart, 'total': total})
+    return render_template('cart.html')
+
 @cart_bp.route('/add', methods=['POST'])
 def add_to_cart():
     data = request.get_json()
-    product_id = str(data.get('product_id'))
-    quantity = int(data.get('quantity', 1))
-
-    if not product_id:
-        return jsonify({'error': 'Product ID is required'}), 400
+    product_id = data.get('product_id')
+    quantity = data.get('quantity', 1)
 
     product = Product.query.get(product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
 
-    cart = session.get('cart', {})
+    # Get cart from session
+    cart = session.get('cart', [])
 
-    if product_id in cart:
-        cart[product_id]['quantity'] += quantity
+    # Check if product is already in cart
+    for item in cart:
+        if item['id'] == product.id:
+            item['quantity'] += quantity
+            item['subtotal'] = item['quantity'] * item['price']
+            break
     else:
-        cart[product_id] = {
+        cart.append({
+            'id': product.id,
             'name': product.name,
-            'price': product.price,
+            'image_url': product.image_url,
+            'price': float(product.price),
             'quantity': quantity,
-            'image_url': product.image_url
-        }
+            'subtotal': float(product.price) * quantity
+        })
 
     session['cart'] = cart
-    session.modified = True  # Ensure session updates
+    session.modified = True
 
-    return jsonify({'message': f'{product.name} added to cart', 'cart': cart}), 200
+    return jsonify({'message': 'Product added to cart', 'cart': cart})
 
-# REMOVE item from cart
-@cart_bp.route('/remove/<int:product_id>', methods=['DELETE'])
+@cart_bp.route('/remove/<int:product_id>', methods=['POST'])
 def remove_from_cart(product_id):
-    cart = session.get('cart', {})
-    product_id = str(product_id)
+    cart = session.get('cart', [])
+    cart = [item for item in cart if item['id'] != product_id]
+    session['cart'] = cart
+    session.modified = True
+    return jsonify({'message': 'Product removed', 'cart': cart})
 
-    if product_id in cart:
-        del cart[product_id]
-        session['cart'] = cart
-        session.modified = True
-        return jsonify({'message': 'Product removed from cart', 'cart': cart}), 200
-    
-    return jsonify({'error': 'Product not found in cart'}), 404
-
-# CLEAR the cart
 @cart_bp.route('/clear', methods=['POST'])
 def clear_cart():
-    session.pop('cart', None)
+    session['cart'] = []
     session.modified = True
-    return jsonify({'message': 'Cart cleared'}), 200
+    return jsonify({'message': 'Cart cleared'})

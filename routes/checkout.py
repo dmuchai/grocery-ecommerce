@@ -1,12 +1,22 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, render_template
 from models import db
 from models.order import Order, OrderItem
 from models.product import Product
 
 checkout_bp = Blueprint('checkout', __name__, url_prefix='/checkout')
 
+@checkout_bp.route('/', methods=['GET'])
+def checkout_page():
+    """Render the checkout page"""
+    cart = session.get('cart', {})  # Get cart items
+    if not isinstance(cart, dict):
+        cart = {}
+        print("Cart data:", cart)
+    return render_template('checkout.html', cart=cart)
+
 @checkout_bp.route('/', methods=['POST'])
 def place_order():
+    """Handle order placement"""
     cart = session.get('cart', {})
     if not cart:
         return jsonify({'error': 'Cart is empty'}), 400

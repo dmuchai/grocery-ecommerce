@@ -3,30 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details - Denncathy Fresh Basket</title>
+    <title>{{ product.name }} - Denncathy Fresh Basket</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .product-img {
-            max-width: 100%;
-            border-radius: 8px;
-        }
-        .product-card {
-            transition: transform 0.2s ease-in-out;
-        }
-        .product-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        }
-    </style>
 </head>
 <body>
 
@@ -49,42 +31,29 @@
 
     <!-- Product Details -->
     <div class="container mt-5">
-	    <h2>All Products</h2>
-	    <div class="row">
-		    {% for product in products %}
-		    <div class="col-md-3">
-			    <div class="card product-card">
-				    <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
-				    <div class="card-body">
-					    <h5 class="card-title">{{ product.name }}</h5>
-					    <p class="card-text text-muted">{{ product.description[:50] }}...</p>
-					    <h6 class="text-success">Kshs {{ product.price }}</h6>
-					    <a href="/products/{{ product.id }}" class="btn btn-primary btn-sm">View Details</a>
-				    </div>
-			    </div>
-		    </div>
-		    {% endfor %}
-	    </div>
-    </div>
+        <div class="row">
+            <div class="col-md-6">
+                <img id="product-image" src="{{ product.image_url }}" class="img-fluid rounded">
+            </div>
+            <div class="col-md-6">
+                <h2 id="product-name">{{ product.name }}</h2>
+                <p id="product-description">{{ product.description }}</p>
+                <h4 id="product-price" class="text-success">Kshs {{ product.price }}</h4>
+                <p id="product-availability" class="text-muted">
+                    {% if product.in_stock %} In Stock {% else %} Out of Stock {% endif %}
+                </p>
+                <button id="add-to-cart" class="btn btn-success">Add to Cart</button>
+            </div>
+        </div>
 
+        <!-- Related Products -->
+        <h3 class="mt-5">Related Products</h3>
+        <div class="row" id="related-products"></div>
+    </div>
 
     <script>
         $(document).ready(function () {
-            const productId = window.location.pathname.split("/").pop();
-
-            // Fetch product details
-            $.get(`/products/${productId}`, function (product) {
-                $("#product-name").text(product.name);
-                $("#product-image").attr("src", product.image_url);
-                $("#product-description").text(product.description);
-                $("#product-price").text(parseFloat(product.price).toFixed(2));
-                $("#product-availability").text(product.in_stock ? "In Stock" : "Out of Stock");
-
-                // Set add-to-cart button action
-                $("#add-to-cart").click(function () {
-                    addToCart(product.id);
-                });
-            });
+            const productId = "{{ product.id }}";
 
             // Fetch related products
             $.get(`/products/${productId}/related`, function (data) {
@@ -105,23 +74,23 @@
                 });
                 $("#related-products").html(relatedHtml);
             });
-        });
 
-        function addToCart(productId) {
-            $.ajax({
-                url: "/cart/add",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ product_id: productId, quantity: 1 }),
-                success: function (response) {
-                    alert(response.message);
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    alert("Failed to add product to cart.");
-                }
+            // Add to cart functionality
+            $("#add-to-cart").click(function () {
+                $.ajax({
+                    url: "/cart/add",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ product_id: productId, quantity: 1 }),
+                    success: function (response) {
+                        alert("Product added to cart!");
+                    },
+                    error: function (error) {
+                        alert("Failed to add to cart.");
+                    }
+                });
             });
-        }
+        });
     </script>
 
     <!-- Bootstrap JS -->
