@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">{{ category_name|capitalize }}</h2>
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{{ url_for('static', filename='images/' + product.image_url) }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p class="text-success fw-bold">${{ product.price }}</p>
+                    <a href="/product/{{ product.id }}" class="btn btn-success">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">No products found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

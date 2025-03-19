@@ -58,11 +58,11 @@
             // Fetch related products
             $.get(`/products/${productId}/related`, function (data) {
                 let relatedHtml = "";
-                data.related_products.forEach(prod => {
+                data.forEach(prod => {
                     relatedHtml += `
                         <div class="col-md-3">
                             <div class="card product-card">
-                                <img src="${product.image_url}" class="card-img-top" alt="${prod.name}">
+                                <img src="${prod.image_url}" class="card-img-top" alt="${prod.name}">
                                 <div class="card-body text-center">
                                     <h5 class="card-title"><a href="/product/${prod.id}" class="text-dark text-decoration-none">${prod.name}</a></h5>
                                     <p class="text-success fw-bold">Kshs ${parseFloat(prod.price).toFixed(2)}</p>

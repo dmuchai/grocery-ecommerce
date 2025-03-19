@@ -85,3 +85,24 @@ def delete_product(product_id):
     db.session.delete(product)
     db.session.commit()
     return jsonify({'message': 'Product deleted successfully'}), 200
+
+@product_bp.route('/<int:product_id>/related', methods=['GET'])
+def related_products(product_id):
+    """Fetch related products based on category."""
+    product = Product.query.get_or_404(product_id)
+
+    if not hasattr(product, 'category_id') or product.category_id is None:
+        return jsonify({'error': 'Product has no category'}), 400
+
+    # Fetch related products in the same category, excluding the current one
+    related = Product.query.filter(
+        Product.category_id == product.category_id,
+        Product.id != product.id
+    ).limit(5).all()
+
+    return jsonify([{
+        'id': p.id,
+        'name': p.name,
+        'image_url': f"/static/images/{p.image_url}" if p.image_url else "/static/images/default.jpg",
+        'price': float(p.price)
+    } for p in related])

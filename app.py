@@ -4,6 +4,7 @@ from flask_session import Session
 from models import db
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
+from models import Product, Category
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -44,6 +45,25 @@ app.register_blueprint(checkout_bp, url_prefix="/checkout")
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route('/category/<category_name>')
+def category_page(category_name):
+    # Query products based on category
+    products = Product.query.filter(Product.category.has(name=category_name)).all()    
+    if not products:
+        flash(f'No products found in {category_name} category.', 'warning')
+
+    return render_template('category.html', products=products, category_name=category_name)
+
+@app.route('/category/<category>/products')
+def get_category_products(category):
+    products = Product.query.filter_by(category=category).all()
+    return jsonify([{
+        "id": p.id,
+        "name": p.name,
+        "price": p.price,
+        "image_url": p.image_url
+    } for p in products])
 
 if __name__ == "__main__":
     app.run(debug=True)
