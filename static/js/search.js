@@ -4,27 +4,37 @@ document.addEventListener("DOMContentLoaded", function () {
         const query = document.getElementById("searchInput").value.trim();
 
         if (query) {
-            fetch(`/search?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    displaySearchResults(data);
-                })
-                .catch(error => console.error("Error:", error));
+            fetchSearchResults(query, 1);
         }
     });
 });
 
-function displaySearchResults(results) {
+function fetchSearchResults(query, page) {
+    const resultsContainer = document.getElementById("searchResults");
+    resultsContainer.innerHTML = "<p>Loading...</p>";
+
+    fetch(`/search?q=${query}&page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            displaySearchResults(data);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            resultsContainer.innerHTML = "<p class='text-danger'>An error occurred. Please try again.</p>";
+        });
+}
+
+function displaySearchResults(data) {
     let resultsContainer = document.getElementById("searchResults");
     resultsContainer.innerHTML = "";
 
-    if (results.length === 0) {
+    if (!data.products || data.products.length === 0) {
         resultsContainer.innerHTML = "<p>No products found.</p>";
         return;
     }
 
-    results.forEach(product => {
-	let imageUrl = product.image_url ? product.image_url : "/static/images/default.jpg";
+    data.products.forEach(product => {
+        let imageUrl = product.image_url || "/static/images/default.jpg";
         let productCard = `
             <div class="card mb-3">
                 <img src="${imageUrl}" class="card-img-top" alt="${product.name}">
@@ -38,4 +48,21 @@ function displaySearchResults(results) {
         `;
         resultsContainer.innerHTML += productCard;
     });
+
+    if (data.pages > 1) {
+        displayPagination(data.q, data.current_page, data.pages);
+    }
+}
+
+function displayPagination(query, currentPage, totalPages) {
+    let paginationContainer = document.getElementById("pagination");
+    paginationContainer.innerHTML = "";
+
+    for (let page = 1; page <= totalPages; page++) {
+        paginationContainer.innerHTML += `
+            <button class="btn btn-outline-primary ${page === currentPage ? 'active' : ''}" onclick="fetchSearchResults('${query}', ${page})">
+                ${page}
+            </button>
+        `;
+    }
 }
