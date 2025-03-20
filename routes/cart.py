@@ -90,20 +90,39 @@ def add_to_cart():
     product_id_str = str(product_id)
 
     if product_id_str in cart_dict:
-        # Increase quantity if product is already in cart
+        # Update quantity. If new quantity is less than or equal to 0, remove the item.
         cart_dict[product_id_str]['quantity'] += quantity
+        if cart_dict[product_id_str]['quantity'] <= 0:
+            del cart_dict[product_id_str]
     else:
-        # Create a new cart item in the session
-        cart_dict[product_id_str] = {
-            'id': product.id,
-            'name': product.name,
-            'image_url': product.image_url,
-            'price': float(product.price),
-            'quantity': quantity
-        }
+        if quantity > 0:
+            # Create a new cart item in the session
+            cart_dict[product_id_str] = {
+                    'id': product.id,
+                    'name': product.name,
+                    'image_url': product.image_url,
+                    'price': float(product.price),
+                    'quantity': quantity
+            }
 
     # Save the updated cart back to session
     session['cart'] = cart_dict
     session.modified = True
 
     return jsonify({'message': 'Item added to cart'}), 201
+
+@cart_bp.route('remove/<int:product_id>', methods=['POST'])
+def remove_from_cart(product_id):
+    cart_dict = session.get('cart', {})
+    product_id_str = str(product_id)
+    if product_id_str in cart_dict:
+        del cart_dict[product_id_str]
+        session['cart'] = cart_dict
+        session.modified = True
+    return jsonify({'message': 'Item removed from cart'})
+
+@cart_bp.route('/clear', methods=['POST'])
+def clear_cart():
+    session['cart'] = {}
+    session.modified = True 
+    return jsonify({'message': 'Cart cleared'})
