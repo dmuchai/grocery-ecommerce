@@ -1,100 +1,94 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} - Denncathy Fresh Basket</title>
+{% extends "base.html" %}
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
+{% block title %}{{ product.name }} - Denncathy Fresh Basket{% endblock %}
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Denncathy Fresh Basket</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/products">Products</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/cart">Cart</a></li>
-                </ul>
-            </div>
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ product.image_url }}" class="img-fluid rounded" alt="{{ product.name }}">
         </div>
-    </nav>
-
-    <!-- Product Details -->
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6">
-                <img id="product-image" src="{{ product.image_url }}" class="img-fluid rounded">
+        <div class="col-md-6">
+            <h2 id="product-name">{{ product.name }}</h2>
+            <p id="product-description">{{ product.description }}</p>
+            <h4 class="text-success">Kshs <span id="product-price">{{ product.price }}</span></h4>
+            <p><strong>Availability:</strong> <span id="product-availability">{% if product.in_stock %}In Stock{% else %}Out of Stock{% endif %}</span></p>
+            
+            <div class="input-group mb-3" style="max-width: 150px;">
+                <button class="btn btn-outline-secondary" type="button" id="decrease-qty">-</button>
+                <input type="number" class="form-control text-center" id="quantity" value="1" min="1">
+                <button class="btn btn-outline-secondary" type="button" id="increase-qty">+</button>
             </div>
-            <div class="col-md-6">
-                <h2 id="product-name">{{ product.name }}</h2>
-                <p id="product-description">{{ product.description }}</p>
-                <h4 id="product-price" class="text-success">Kshs {{ product.price }}</h4>
-                <p id="product-availability" class="text-muted">
-                    {% if product.in_stock %} In Stock {% else %} Out of Stock {% endif %}
-                </p>
-                <button id="add-to-cart" class="btn btn-success">Add to Cart</button>
-            </div>
+            
+            <button id="add-to-cart" class="btn btn-primary">Add to Cart</button>
         </div>
-
-        <!-- Related Products -->
-        <h3 class="mt-5">Related Products</h3>
-        <div class="row" id="related-products"></div>
     </div>
 
-    <script>
-        $(document).ready(function () {
-            const productId = "{{ product.id }}";
+    <!-- Related Products Section -->
+    <div class="mt-5">
+        <h3>Related Products</h3>
+        <div class="row" id="related-products">
+            <!-- Related products will be inserted here via AJAX -->
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-            // Fetch related products
-            $.get(`/products/${productId}/related`, function (data) {
-                let relatedHtml = "";
-                data.forEach(prod => {
-                    relatedHtml += `
-                        <div class="col-md-3">
-                            <div class="card product-card">
-                                <img src="${prod.image_url}" class="card-img-top" alt="${prod.name}">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title"><a href="/products/${prod.id}" class="text-dark text-decoration-none">${prod.name}</a></h5>
-                                    <p class="text-success fw-bold">Kshs ${parseFloat(prod.price).toFixed(2)}</p>
-                                    <a href="/products/${prod.id}" class="btn btn-sm btn-outline-primary">View</a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                $("#related-products").html(relatedHtml);
-            });
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        const productId = "{{ product.id }}";
 
-            // Add to cart functionality
-            $("#add-to-cart").click(function () {
-                $.ajax({
-                    url: "/cart/add",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ product_id: productId, quantity: 1 }),
-                    success: function (response) {
-                        alert("Product added to cart!");
-                    },
-                    error: function (error) {
-                        alert("Failed to add to cart.");
-                    }
-                });
+        // Increase and decrease quantity
+        $("#increase-qty").click(function () {
+            let qty = parseInt($("#quantity").val());
+            $("#quantity").val(qty + 1);
+        });
+
+        $("#decrease-qty").click(function () {
+            let qty = parseInt($("#quantity").val());
+            if (qty > 1) {
+                $("#quantity").val(qty - 1);
+            }
+        });
+
+        // Add product to cart
+        $("#add-to-cart").click(function () {
+            let quantity = parseInt($("#quantity").val());
+            $.ajax({
+                url: "/cart/add",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ product_id: productId, quantity: quantity }),
+                success: function (response) {
+                    alert(response.message);
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                    alert("Failed to add product to cart.");
+                }
             });
         });
-    </script>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
+        // Fetch related products
+        $.get(`/products/${productId}/related`, function (data) {
+            let relatedHtml = "";
+            data.forEach(prod => {
+                relatedHtml += `
+                    <div class="col-md-3">
+                        <div class="card product-card">
+                            <img src="${prod.image_url}" class="card-img-top" alt="${prod.name}">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><a href="/products/${prod.id}" class="text-dark text-decoration-none">${prod.name}</a></h5>
+                                <p class="text-success fw-bold">Kshs ${parseFloat(prod.price).toFixed(2)}</p>
+                                <a href="/products/${prod.id}" class="btn btn-sm btn-outline-primary">View</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            $("#related-products").html(relatedHtml);
+        });
+    });
+</script>
+{% endblock %}
