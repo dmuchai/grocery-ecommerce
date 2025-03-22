@@ -9,7 +9,7 @@ class Order(db.Model):
     customer_name = db.Column(db.String(128), nullable=False)
     guest_identifier = db.Column(db.String(36), nullable=True)
     email = db.Column(db.String(128), nullable=False)
-    shipping_address = db.Column(db.String(256), nullable=False)
+    address = db.Column(db.String(256), nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default="Pending")  # Pending, Confirmed, Completed
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -24,7 +24,7 @@ class Order(db.Model):
             "customer_name": self.customer_name,
             "guest_identifier": self.guest_identifier,
             "email": self.email,
-            "shipping_address": self.shipping_address,
+            "address": self.address,
             "total_price": self.total_price,
             "status": self.status,
             "created_at": self.created_at,

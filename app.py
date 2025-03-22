@@ -1,4 +1,5 @@
-from flask import Flask, render_template, session
+import json
+from flask import Flask, render_template, session, jsonify, url_for
 from flask_migrate import Migrate
 from flask_session import Session
 from models import db
@@ -65,5 +66,19 @@ def get_category_products(category):
         "image_url": p.image_url
     } for p in products])
 
-if __name__ == "__main__":
-    app.run(debug=True)
+def get_cart_from_session_or_db(user_id=None):
+    """Fetch the cart from session (guest users) or database (logged-in users)."""
+    if user_id:
+        # Fetch cart from database for logged-in users
+        cart = Cart.query.filter_by(user_id=user_id).first()
+        return cart.items if cart else []
+    else:
+        # Fetch cart from session for guest users
+        return session.get("cart", [])
+
+@app.route('/cart-data')
+def get_cart_data():
+    cart = get_cart_from_session_or_db()
+    for item in cart.values():
+        item["image_url"] = url_for('static', filename=f'images/{item["image_url"]}', _external=True)
+    return jsonify({"items": list(cart.values())})

@@ -17,9 +17,9 @@ def place_order():
     data = request.get_json()
     customer_name = data.get('customer_name')
     email = data.get('email')
-    shipping_address = data.get('shipping_address')
+    address = data.get('address')
 
-    if not email or not shipping_address:
+    if not email or not address:
         return jsonify({'error': 'Missing customer details'}), 400
 
     try:
@@ -33,7 +33,7 @@ def place_order():
                 user_id=user_id,
                 customer_name=customer_name,
                 email=email,
-                shipping_address=shipping_address,
+                address=address,
                 total_price=total_price
         )
 
