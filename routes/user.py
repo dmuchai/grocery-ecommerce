@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, render_template
 from models import db, Cart
 from models.user import User
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,6 +6,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Users Blueprint
 user_bp = Blueprint('user', __name__)
 
+# Serve the Register Page
+@user_bp.route('/register', methods=['GET'])
+def show_register():
+    """Display the register page."""
+    return render_template('register.html')
+
+# Register a New User
 @user_bp.route('/register', methods=['POST'])
 def register():
     """Register a new user."""
@@ -26,6 +33,13 @@ def register():
     
     return jsonify({'message': 'User registered successfully'}), 201
 
+# Serve the Login Page
+@user_bp.route('/login', methods=['GET'])
+def show_login():
+    """Display the login page."""
+    return render_template('login.html')
+
+# Login User
 @user_bp.route('/login', methods=['POST'])
 def login():
     """Authenticate user and merge guest cart into the database."""
