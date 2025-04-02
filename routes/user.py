@@ -15,18 +15,27 @@ def show_register():
 # Register a New User
 @user_bp.route('/register', methods=['POST'])
 def register():
-    """Register a new user."""
-    data = request.get_json()
+    # Check for JSON request
+    if request.content_type == 'application/json':
+        data = request.get_json()
+    else:
+        data = request.form  # Handle form data
+
+    if not data:
+        return jsonify({"error": "Invalid request format"}), 400
+
+    email = data.get('email')
+    password = data.get('password')
+
+    if not all([email, password]):
+        return jsonify({"error": "All fields are required"}), 400
     
-    if not data.get("username") or not data.get("email") or not data.get("password"):
-        return jsonify({"error": "Missing required fields"}), 400
-    
-    existing_user = User.query.filter((User.username == data['username']) | (User.email == data['email'])).first()
+    existing_user = User.query.filter((User.email == data['email'])).first()
     if existing_user:
         return jsonify({"error": "User already exists"}), 409
     
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
-    new_user = User(username=data['username'], email=data['email'], password=hashed_password)
+    new_user = User(email=data['email'], password=hashed_password)
     
     db.session.add(new_user)
     db.session.commit()
@@ -43,11 +52,15 @@ def show_login():
 @user_bp.route('/login', methods=['POST'])
 def login():
     """Authenticate user and merge guest cart into the database."""
-    data = request.get_json()
-    username = data.get("username")
+    if request.is_json:
+        data = request.get_json()
+    else:
+        data = request.form
+
+    email = data.get("email")
     password = data.get("password")
 
-    user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(email=email).first()
     if not user or not check_password_hash(user.password, password):
         return jsonify({"error": "Invalid credentials"}), 401
 
