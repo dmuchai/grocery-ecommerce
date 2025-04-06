@@ -40,8 +40,11 @@ def register():
     
     db.session.add(new_user)
     db.session.commit()
+
+    # Log the user in by storing their user_id in the session
+    session['user_id'] = new_user.id
     
-    return jsonify({'message': 'User registered successfully'}), 201
+    return redirect(url_for('home'))
 
 # Serve the Login Page
 @user_bp.route('/login', methods=['GET'])
