@@ -1,5 +1,5 @@
 import uuid
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, render_template
 from models import db
 from models.order import Order
 from models.order_item import OrderItem
@@ -77,3 +77,18 @@ def place_order():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Failed to place order: {str(e)}'}), 500
+
+@order_bp.route('/history', methods=['GET'])
+def order_history():
+    user_id = session.get('user_id')
+    guest_id = session.get('guest_identifier')  # set during guest checkout
+
+    if not user_id and not guest_id:
+        return render_template('order_history.html', orders=[])
+
+    if user_id:
+        orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
+    else:
+        orders = Order.query.filter_by(guest_identifier=guest_id).order_by(Order.created_at.desc()).all()
+
+    return render_template('order_history.html', orders=orders)

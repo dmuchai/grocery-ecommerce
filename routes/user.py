@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, render_template
+from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for
 from models import db, Cart
 from models.user import User
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,10 +24,11 @@ def register():
     if not data:
         return jsonify({"error": "Invalid request format"}), 400
 
+    username = data.get('username')
     email = data.get('email')
     password = data.get('password')
 
-    if not all([email, password]):
+    if not all([username, email, password]):
         return jsonify({"error": "All fields are required"}), 400
     
     existing_user = User.query.filter((User.email == data['email'])).first()
@@ -35,7 +36,7 @@ def register():
         return jsonify({"error": "User already exists"}), 409
     
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
-    new_user = User(email=data['email'], password=hashed_password)
+    new_user = User(username=username,  email=email, password=hashed_password)
     
     db.session.add(new_user)
     db.session.commit()
@@ -80,13 +81,12 @@ def login():
 
     db.session.commit()  # Commit after processing all items
 
-    response = jsonify({'message': 'Login successful'})
+    response = redirect(url_for('home'))
     response.set_cookie('guest_cart', '', expires=0)  # Clear guest cart
 
     return response
 
 @user_bp.route('/logout', methods=['POST'])
 def logout():
-    """Logout user and clear session."""
     session.pop('user_id', None)
-    return jsonify({'message': 'Logged out successfully'}), 200
+    return redirect(url_for('home'))

@@ -1,32 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order History</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <h1>Your Order History</h1>
-    <div id="order-list"></div>
+{% extends "base.html" %}
 
-    <script>
-        $(document).ready(function() {
-            $.get("/orders", function(data) {
-                let ordersHtml = "";
-                data.orders.forEach(order => {
-                    ordersHtml += `
-                        <div>
-                            <h3>Order #${order.id}</h3>
-                            <p>Name: ${order.customer_name}</p>
-                            <p>Address: ${order.address}</p>
-                            <p>Total: Kshs ${order.total_price}</p>
-                        </div>
-                    `;
-                });
-                $("#order-list").html(ordersHtml);
-            });
-        });
-    </script>
-</body>
-</html>
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>Your Order History</h1>
+        <a href="{{ url_for('home') }}">← Back to Home</a>
+    </header>
+
+    <section id="order-history">
+        {% if orders %}
+            {% for order in orders %}
+                <div class="order-item">
+                    <h3>Order #{{ order.id }}</h3>
+                    <p><strong>Customer:</strong> {{ order.customer_name }}</p>
+                    <p><strong>Email:</strong> {{ order.email }}</p>
+                    <p><strong>Address:</strong> {{ order.address }}</p>
+                    <p><strong>Status:</strong> {{ order.status }}</p>
+                    <p><strong>Placed on:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p><strong>Total Price:</strong> KES {{ "%.2f"|format(order.total_price) }}</p>
+                    <hr>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>You have no past orders yet.</p>
+        {% endif %}
+    </section>
+{% endblock %}

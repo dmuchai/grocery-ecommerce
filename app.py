@@ -1,11 +1,10 @@
 import json
-from flask import Flask, render_template, session, jsonify, url_for
+from flask import Flask, render_template, session, jsonify, redirect, url_for
 from flask_migrate import Migrate
 from flask_session import Session
-from models import db
+from models import db, User, Product, Category, Cart
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
-from models import Product, Category
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -45,7 +44,13 @@ app.register_blueprint(checkout_bp, url_prefix="/checkout")
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    user_email = None
+    if 'user_id' in session:
+        from models.user import User
+        user = User.query.get(session['user_id'])
+        if user:
+            user_email = user.email
+    return render_template("index.html", is_logged_in=bool(user_email), user_email=user_email)
 
 @app.route('/category/<category_name>')
 def category_page(category_name):
@@ -82,3 +87,20 @@ def get_cart_data():
     for item in cart.values():
         item["image_url"] = url_for('static', filename=f'images/{item["image_url"]}', _external=True)
     return jsonify({"items": list(cart.values())})
+
+@app.context_processor
+def inject_user():
+    user_id = session.get('user_id')
+    if user_id:
+        user = db.session.get(User, user_id)
+        if user:
+            return {
+                'is_logged_in': True,
+                'user_email': user.email,
+                'username': user.username  # <-- added
+            }
+    return {
+        'is_logged_in': False,
+        'user_email': None,
+        'username': None
+    }
