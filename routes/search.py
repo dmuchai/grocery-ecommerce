@@ -25,6 +25,7 @@ def search():
         } for p in results.items]
 
         return jsonify({
+            "q": query,
             "products": products,
             "total": results.total,
             "pages": results.pages,

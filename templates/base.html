@@ -13,23 +13,24 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="/">Denncathy Fresh Basket</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/products">Products</a>
+                        <a class="nav-link {% if request.path.startswith('/products') %}active{% endif %}" href="/products">Products</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cart">My Cart</a>
+                        <a class="nav-link {% if request.path.startswith('/cart') %}active{% endif %}" href="/cart">My Cart</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/order/history">Orders</a>
+                        <a class="nav-link {% if request.path.startswith('/order') %}active{% endif %}" href="/order/history">Orders</a>
                     </li>
 
                     {% if is_logged_in %}
@@ -57,7 +58,8 @@
             </div>
         </div>
     </nav>
-        <!-- Main Content -->
+
+    <!-- Main Content -->
     <main>
         {% block content %}{% endblock %}
     </main>
@@ -66,8 +68,24 @@
     <footer class="bg-dark text-white text-center py-3">
         <p>&copy; 2025 Denncathy Fresh Basket. All Rights Reserved.</p>
     </footer>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}
+
+    <!-- Collapse navbar on click (mobile) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navbarCollapse.classList.contains('show')) {
+                        new bootstrap.Collapse(navbarCollapse).toggle();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -25,36 +25,60 @@ function fetchSearchResults(query, page) {
 }
 
 function displaySearchResults(data) {
-    let resultsContainer = document.getElementById("searchResults");
+    const resultsContainer = document.getElementById("searchResults");
     resultsContainer.innerHTML = "";
 
     if (!data.products || data.products.length === 0) {
-        resultsContainer.innerHTML = "<p>No products found.</p>";
+        resultsContainer.innerHTML = `
+            <p class="text-danger mt-4">No results found for "<strong>${data.q}</strong>".</p>
+        `;
         return;
     }
 
+    // Add heading
+    const heading = document.createElement("h5");
+    heading.className = "mt-4 mb-3";
+    heading.innerHTML = `Search Results for <span class="text-white">"${data.q}"</span>`;
+    resultsContainer.appendChild(heading);
+
+    // Create a row container for product cards
+    const row = document.createElement("div");
+    row.className = "row justify-content-center";
+
     data.products.forEach(product => {
-        let imageUrl = product.image_url || "/static/images/default.jpg";
-        let productCard = `
-            <div class="card mb-3">
-                <img src="${imageUrl}" class="card-img-top" alt="${product.name}">
-                <div class="card-body">
-                    <h5 class="card-title">${product.name}</h5>
+        const col = document.createElement("div");
+        col.className = "col-md-4 mb-4";
+
+        const imageUrl = product.image_url || "/static/images/default.jpg";
+
+        col.innerHTML = `
+            <div class="card h-100">
+                <a href="/products/${product.id}">
+                    <img src="${imageUrl}" class="card-img-top" alt="${product.name}">
+                </a>
+                <div class="card-body d-flex flex-column">
+                    <a href="/products/${product.id}" class="text-decoration-none text-dark">
+                        <h5 class="card-title">${product.name}</h5>
+                    </a>
                     <p class="card-text">${product.description}</p>
                     <p class="text-success"><strong>Kshs ${parseFloat(product.price).toFixed(2)}</strong></p>
-                    <button class="btn btn-success add-to-cart" data-product-id="${product.id}">Add to Cart</button>
+                    <a href="/products/${product.id}" class="btn btn-outline-primary mt-auto mb-2">View Product</a>
+                    <button class="btn btn-success mt-auto add-to-cart" data-product-id="${product.id}">Add to Cart</button>
                 </div>
             </div>
         `;
-        resultsContainer.innerHTML += productCard;
+
+        row.appendChild(col);
     });
+
+    resultsContainer.appendChild(row);
 
     // Attach event listeners to the "Add to Cart" buttons
     document.querySelectorAll(".add-to-cart").forEach(button => {
-	button.addEventListener("click", function () {
-		let productId = this.getAttribute("data-product-id");
-		addToCart(productId, 1); // Default quantity = 1
-	});
+        button.addEventListener("click", function () {
+            const productId = this.getAttribute("data-product-id");
+            addToCart(productId, 1); // Default quantity = 1
+        });
     });
 
     if (data.pages > 1) {
@@ -63,7 +87,7 @@ function displaySearchResults(data) {
 }
 
 function displayPagination(query, currentPage, totalPages) {
-    let paginationContainer = document.getElementById("pagination");
+    const paginationContainer = document.getElementById("pagination");
     paginationContainer.innerHTML = "";
 
     for (let page = 1; page <= totalPages; page++) {
