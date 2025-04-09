@@ -66,7 +66,7 @@ def login():
 
     user = User.query.filter_by(email=email).first()
     if not user or not check_password_hash(user.password, password):
-        return jsonify({"error": "Invalid credentials"}), 401
+        return render_template('login.html', error='Invalid credentials', email=email), 401
 
     session['user_id'] = user.id
 
