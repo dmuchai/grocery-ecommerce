@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for
+from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for, flash
 from models import db, Cart
 from models.user import User
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,35 +15,37 @@ def show_register():
 # Register a New User
 @user_bp.route('/register', methods=['POST'])
 def register():
-    # Check for JSON request
-    if request.content_type == 'application/json':
-        data = request.get_json()
-    else:
-        data = request.form  # Handle form data
-
-    if not data:
-        return jsonify({"error": "Invalid request format"}), 400
+    data = request.form
 
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
 
+    # Validate form input
     if not all([username, email, password]):
-        return jsonify({"error": "All fields are required"}), 400
-    
-    existing_user = User.query.filter((User.email == data['email'])).first()
+        return render_template(
+            'register.html',
+            error="All fields are required.",
+            username=username,
+            email=email
+        ), 400
+
+    # Check if user already exists
+    existing_user = User.query.filter_by(email=email).first()
     if existing_user:
-        return jsonify({"error": "User already exists"}), 409
-    
-    hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
-    new_user = User(username=username,  email=email, password=hashed_password)
-    
+        # Redirect to login page with flash message
+        flash("An account with this email already exists. Please log in.", "warning")
+        return redirect(url_for('user.show_login'))
+
+    # Create and save user
+    hashed_password = generate_password_hash(password)
+    new_user = User(username=username, email=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
 
-    # Log the user in by storing their user_id in the session
+    # Log in the user
     session['user_id'] = new_user.id
-    
+
     return redirect(url_for('home'))
 
 # Serve the Login Page
@@ -89,11 +91,13 @@ def login():
 
     return response
 
-@user_bp.route('/logout', methods=['POST'])
+# Logout Route
+@user_bp.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('home'))
 
+# Forgot Password Route
 @user_bp.route('/forgot-password', methods=['GET'])
 def forgot_password():
     """Display the forgot password page (placeholder)."""
