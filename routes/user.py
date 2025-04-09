@@ -93,3 +93,8 @@ def login():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('home'))
+
+@user_bp.route('/forgot-password', methods=['GET'])
+def forgot_password():
+    """Display the forgot password page (placeholder)."""
+    return render_template('forgot_password.html')

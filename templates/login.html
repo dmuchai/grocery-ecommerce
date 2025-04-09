@@ -1,18 +1,57 @@
 {% extends "base.html" %}
 
+{% block title %}Login | Denncathy Fresh Basket{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>Login</h2>
-    <form method="POST">
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" id="email" name="email" placeholder="Email" required class="form-control mb-2">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center mb-4">Login</h2>
+
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('user.login') }}">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" name="email" class="form-control" id="email"
+                           placeholder="Enter your email" value="{{ email or '' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" name="password" class="form-control" id="password"
+                               placeholder="Enter your password" required>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <a href="{{ url_for('user.forgot_password') }}" class="text-decoration-none">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Login</button>
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" id="password" name="password" placeholder="Password" required class="form-control mb-2">
-        </div>
-        <button type="submit" class="btn btn-success">Login</button>
-    </form>
+    </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+
+    toggleBtn.addEventListener('click', () => {
+        const type = passwordField.type === 'password' ? 'text' : 'password';
+        passwordField.type = type;
+        toggleBtn.textContent = type === 'password' ? 'Show' : 'Hide';
+    });
+</script>
 {% endblock %}
