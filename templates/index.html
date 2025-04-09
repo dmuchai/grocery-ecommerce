@@ -30,31 +30,48 @@
 <section id="products" class="container my-5">
     <h2 class="text-center mb-4">Featured Products</h2>
     <div class="row">
+        <!-- Vegetables -->
         <div class="col-md-4">
             <div class="card">
-                <img src="{{ url_for('static', filename='images/vegetables.jpg') }}" class="card-img-top object-fit-cover" alt="Vegetables" style="height: 200px;">
+                <a href="/category/vegetables">
+                    <img src="{{ url_for('static', filename='images/vegetables.jpg') }}" class="card-img-top object-fit-cover" alt="Vegetables" style="height: 200px;">
+                </a>
                 <div class="card-body">
-                    <h5 class="card-title">Fresh Vegetables</h5>
+                    <h5 class="card-title">
+                        <a href="/category/vegetables" class="text-decoration-none text-dark">Fresh Vegetables</a>
+                    </h5>
                     <p class="card-text">Fresh and locally sourced vegetables.</p>
                     <a href="/category/vegetables" class="btn btn-success">Shop Now</a>
                 </div>
             </div>
         </div>
+
+        <!-- Fruits -->
         <div class="col-md-4">
             <div class="card">
-                <img src="{{ url_for('static', filename='images/fruits.jpg') }}" class="card-img-top object-fit-cover" alt="Fruits" style="height: 200px;">
+                <a href="/category/fruits">
+                    <img src="{{ url_for('static', filename='images/fruits.jpg') }}" class="card-img-top object-fit-cover" alt="Fruits" style="height: 200px;">
+                </a>
                 <div class="card-body">
-                    <h5 class="card-title">Fruits</h5>
+                    <h5 class="card-title">
+                        <a href="/category/fruits" class="text-decoration-none text-dark">Fruits</a>
+                    </h5>
                     <p class="card-text">Fresh and juicy fruits.</p>
                     <a href="/category/fruits" class="btn btn-success">Shop Now</a>
                 </div>
             </div>
         </div>
+
+        <!-- Eggs -->
         <div class="col-md-4">
             <div class="card">
-                <img src="{{ url_for('static', filename='images/eggs.jpg') }}" class="card-img-top object-fit-cover" alt="Eggs" style="height: 200px;">
+                <a href="/category/eggs">
+                    <img src="{{ url_for('static', filename='images/eggs.jpg') }}" class="card-img-top object-fit-cover" alt="Eggs" style="height: 200px;">
+                </a>
                 <div class="card-body">
-                    <h5 class="card-title">Eggs</h5>
+                    <h5 class="card-title">
+                        <a href="/category/eggs" class="text-decoration-none text-dark">Eggs</a>
+                    </h5>
                     <p class="card-text">High-quality eggs for baking and cooking.</p>
                     <a href="/category/eggs" class="btn btn-success">Shop Now</a>
                 </div>
