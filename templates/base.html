@@ -12,7 +12,10 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="/">Denncathy Fresh Basket</a>
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+		    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Denncathy Logo" width="40" height="40" class="me-2">
+		    <span>Denncathy Fresh Basket</span>
+	    </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -65,8 +68,16 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3">
-        <p>&copy; 2025 Denncathy Fresh Basket. All Rights Reserved.</p>
+    <footer class="bg-dark text-white py-4 mt-5">
+	    <div class="container text-center">
+		    <div class="mb-3">
+			    <a href="/about" class="text-white me-3">About Us</a>
+			    <a href="/contact" class="text-white me-3">Contact Us</a>
+			    <a href="https://instagram.com/denncathy_ent" class="text-white me-3">Instagram</a>
+			    <a href="https://facebook.com/denncathy" class="text-white">Facebook</a>
+		    </div>
+		    <p class="mb-0">&copy; 2025 Denncathy Fresh Basket. All Rights Reserved.</p>
+	    </div>
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
