@@ -155,7 +155,7 @@ Submit a Pull Request! 🚀
 📢 Connect With Me
 💼 LinkedIn: Dennis Muchai
 📂 GitHub: @dmuchai
-📝 Blog Post: Read about this project here
+📝 Website: https://denncathy.co.ke/
 
 🎉 Thank You for Checking Out Denncathy Fresh Basket!
 If you found this project helpful, please give it a ⭐ on GitHub! 🚀
