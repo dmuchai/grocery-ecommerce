@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,17 +8,44 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
+
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100; display: none;">
+        <div id="cart-toast" class="toast align-items-center text-bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toast-message">Item added to cart</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Mini Cart -->
+    <div id="mini-cart" class="card shadow-lg position-fixed end-0 bottom-0 m-4"
+        style="width: 300px; z-index: 1050; display: none;">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-cart3"></i> Mini Cart</span>
+            <button type="button" class="btn-close btn-close-white btn-sm" id="close-mini-cart" aria-label="Close"></button>
+        </div>
+        <ul class="list-group list-group-flush" id="mini-cart-items"></ul>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <strong id="mini-cart-total">Kshs 0.00</strong>
+            <a href="/cart" class="btn btn-sm btn-outline-light">View Cart</a>
+        </div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
-		    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Denncathy Logo" width="40" height="40" class="me-2">
-		    <span>Denncathy Fresh Basket</span>
-	    </a>
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Denncathy Logo" width="40" height="40" class="me-2">
+                <span>Denncathy Fresh Basket</span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -27,35 +55,39 @@
                         <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path.startswith('/products') %}active{% endif %}" href="/products">Products</a>
+                        <a class="nav-link {% if request.path.startswith('/products') %}active{% endif %}"
+                            href="/products">Products</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path.startswith('/cart') %}active{% endif %}" href="/cart">My Cart</a>
+                        <a class="nav-link position-relative {% if request.path.startswith('/cart') %}active{% endif %}"
+                            href="/cart">
+                            <i class="bi bi-cart3"></i> My Cart
+                            <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ cart_count or 0 }}
+                            </span>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path.startswith('/order') %}active{% endif %}" href="/order/history">Orders</a>
+                        <a class="nav-link {% if request.path.startswith('/order') %}active{% endif %}"
+                            href="/order/history">Orders</a>
                     </li>
 
                     {% if is_logged_in %}
-                        <li class="nav-item">
-                            <span class="nav-link">Hi, {{ username }}</span>
-                        </li>
-                        <li class="nav-item">
-                            <form action="/user/logout" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-warning mt-1">Logout</button>
-                            </form>
-                        </li>
+                    <li class="nav-item"><span class="nav-link">Hi, {{ username }}</span></li>
+                    <li class="nav-item">
+                        <form action="/user/logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-warning mt-1">Logout</button>
+                        </form>
+                    </li>
                     {% else %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                My Account
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
-                                <li><a class="dropdown-item" href="/user/register">Register</a></li>
-                                <li><a class="dropdown-item" href="/user/login">Login</a></li>
-                            </ul>
-                        </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">My Account</a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                            <li><a class="dropdown-item" href="/user/register">Register</a></li>
+                            <li><a class="dropdown-item" href="/user/login">Login</a></li>
+                        </ul>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
@@ -63,40 +95,42 @@
     </nav>
 
     <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+    <main>{% block content %}{% endblock %}</main>
 
     <!-- Footer -->
     <footer class="bg-dark text-white py-4 mt-5">
-	    <div class="container text-center">
-		    <div class="mb-3">
-			    <a href="/about" class="text-white me-3">About Us</a>
-			    <a href="/contact" class="text-white me-3">Contact Us</a>
-			    <a href="https://instagram.com/denncathy_ent" class="text-white me-3">Instagram</a>
-			    <a href="https://facebook.com/denncathy" class="text-white">Facebook</a>
-		    </div>
-		    <p class="mb-0">&copy; 2025 Denncathy Fresh Basket. All Rights Reserved.</p>
-	    </div>
+        <div class="container text-center">
+            <div class="mb-3">
+                <a href="/about" class="text-white me-3">About Us</a>
+                <a href="/contact" class="text-white me-3">Contact Us</a>
+                <a href="https://instagram.com/denncathy_ent" class="text-white me-3">Instagram</a>
+                <a href="https://facebook.com/denncathy" class="text-white">Facebook</a>
+            </div>
+            <p class="mb-0">&copy; 2025 Denncathy Fresh Basket. All Rights Reserved.</p>
+        </div>
     </footer>
 
+    <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+    {% endblock %}
 
-    <!-- Collapse navbar on click (mobile) -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const navLinks = document.querySelectorAll('.nav-link');
-            const navbarCollapse = document.querySelector('.navbar-collapse');
-            navLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    if (navbarCollapse.classList.contains('show')) {
-                        new bootstrap.Collapse(navbarCollapse).toggle();
-                    }
-                });
+<!-- Collapse navbar on click -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const navLinks = document.querySelectorAll('.nav-link:not(.dropdown-toggle)');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (navbarCollapse.classList.contains('show')) {
+                    new bootstrap.Collapse(navbarCollapse).toggle();
+                }
             });
         });
-    </script>
+    });
+</script>
 </body>
+
 </html>

@@ -38,7 +38,7 @@ from routes.checkout import checkout_bp
 app.register_blueprint(product_bp, url_prefix="/products")
 app.register_blueprint(order_bp, url_prefix="/order")
 app.register_blueprint(user_bp, url_prefix="/user")
-app.register_blueprint(search_bp)
+app.register_blueprint(search_bp, url_prefix="/search")
 app.register_blueprint(cart_bp, url_prefix="/cart")
 app.register_blueprint(checkout_bp, url_prefix="/checkout")
 
@@ -112,3 +112,13 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
+@app.context_processor
+def inject_cart_count():
+    """
+    Make `cart_count` available in every template,
+    based on the `session['cart']` quantities.
+    """
+    cart = session.get('cart', {})  # e.g. { "1": { "quantity": 2 }, ... }
+    total = sum(item['quantity'] for item in cart.values())
+    return dict(cart_count=total)

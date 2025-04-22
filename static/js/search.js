@@ -1,118 +1,113 @@
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("searchForm").addEventListener("submit", function (event) {
-        event.preventDefault();
-        const query = document.getElementById("searchInput").value.trim();
+    const searchInput = document.getElementById("searchInput");
+    const searchForm = document.getElementById("searchForm");
+    const suggestionsBox = document.getElementById("searchSuggestions");
 
+    let debounceTimer;
+    let activeIndex = -1; // Track selected suggestion
+
+    // 🔍 Handle input typing for suggestions
+    searchInput.addEventListener("input", function () {
+        const query = this.value.trim();
+
+        clearTimeout(debounceTimer);
+        if (!query) {
+            suggestionsBox.innerHTML = "";
+            suggestionsBox.style.display = "none";
+            activeIndex = -1;
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            fetch(`/search/suggest?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsBox.innerHTML = "";
+                    activeIndex = -1;
+
+                    if (data.length === 0) {
+                        suggestionsBox.style.display = "none";
+                        return;
+                    }
+
+                    data.forEach(product => {
+                        const item = document.createElement("a");
+                        item.classList.add("list-group-item", "list-group-item-action", "d-flex", "align-items-center");
+                        item.href = `/products/${product.id}`;
+                        item.tabIndex = -1; // prevent tab stop
+
+                        const img = document.createElement("img");
+                        img.src = product.image_url;
+                        img.alt = product.name;
+                        img.classList.add("me-2");
+                        img.style.width = "40px";
+                        img.style.height = "40px";
+                        img.style.objectFit = "cover";
+                        img.style.borderRadius = "5px";
+
+                        const text = document.createElement("span");
+                        text.textContent = product.name;
+
+                        item.appendChild(img);
+                        item.appendChild(text);
+                        suggestionsBox.appendChild(item);
+                    });
+
+                    suggestionsBox.style.display = "block";
+                })
+                .catch(err => {
+                    console.error("Suggest error:", err);
+                });
+        }, 300);
+    });
+
+    // 🧠 Handle form submission (Enter key or button click)
+    searchForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const query = searchInput.value.trim();
         if (query) {
-            fetchSearchResults(query, 1);
+            window.location.href = `/search?q=${encodeURIComponent(query)}`;
         }
     });
+
+    // 👀 Hide suggestions if user clicks outside
+    document.addEventListener("click", function (e) {
+        if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
+            suggestionsBox.style.display = "none";
+        }
+    });
+
+    // ⌨️ Keyboard navigation
+    searchInput.addEventListener("keydown", function (e) {
+        const items = Array.from(suggestionsBox.querySelectorAll("a"));
+
+        if (suggestionsBox.style.display === "none" || items.length === 0) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            activeIndex = (activeIndex + 1) % items.length;
+            updateActiveSuggestion(items);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            activeIndex = (activeIndex - 1 + items.length) % items.length;
+            updateActiveSuggestion(items);
+        } else if (e.key === "Enter") {
+            if (activeIndex >= 0 && activeIndex < items.length) {
+                window.location.href = items[activeIndex].href;
+                suggestionsBox.style.display = "none";
+                e.preventDefault();
+            }
+        }
+    });
+
+    function updateActiveSuggestion(items) {
+        items.forEach((item, index) => {
+            if (index === activeIndex) {
+                item.classList.add("active");
+                item.scrollIntoView({ block: "nearest" });
+            } else {
+                item.classList.remove("active");
+            }
+        });
+    }
 });
-
-function fetchSearchResults(query, page) {
-    const resultsContainer = document.getElementById("searchResults");
-    resultsContainer.innerHTML = "<p>Loading...</p>";
-
-    fetch(`/search?q=${query}&page=${page}`)
-        .then(response => response.json())
-        .then(data => {
-            displaySearchResults(data);
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            resultsContainer.innerHTML = "<p class='text-danger'>An error occurred. Please try again.</p>";
-        });
-}
-
-function displaySearchResults(data) {
-    const resultsContainer = document.getElementById("searchResults");
-    resultsContainer.innerHTML = "";
-
-    if (!data.products || data.products.length === 0) {
-        resultsContainer.innerHTML = `
-            <p class="text-danger mt-4">No results found for "<strong>${data.q}</strong>".</p>
-        `;
-        return;
-    }
-
-    // Add heading
-    const heading = document.createElement("h5");
-    heading.className = "mt-4 mb-3";
-    heading.innerHTML = `Search Results for <span class="text-white">"${data.q}"</span>`;
-    resultsContainer.appendChild(heading);
-
-    // Create a row container for product cards
-    const row = document.createElement("div");
-    row.className = "row justify-content-center";
-
-    data.products.forEach(product => {
-        const col = document.createElement("div");
-        col.className = "col-md-4 mb-4";
-
-        const imageUrl = product.image_url || "/static/images/default.jpg";
-
-        col.innerHTML = `
-            <div class="card h-100">
-                <a href="/products/${product.id}">
-                    <img src="${imageUrl}" class="card-img-top" alt="${product.name}">
-                </a>
-                <div class="card-body d-flex flex-column">
-                    <a href="/products/${product.id}" class="text-decoration-none text-dark">
-                        <h5 class="card-title">${product.name}</h5>
-                    </a>
-                    <p class="card-text">${product.description}</p>
-                    <p class="text-success"><strong>Kshs ${parseFloat(product.price).toFixed(2)}</strong></p>
-                    <a href="/products/${product.id}" class="btn btn-outline-primary mt-auto mb-2">View Product</a>
-                    <button class="btn btn-success mt-auto add-to-cart" data-product-id="${product.id}">Add to Cart</button>
-                </div>
-            </div>
-        `;
-
-        row.appendChild(col);
-    });
-
-    resultsContainer.appendChild(row);
-
-    // Attach event listeners to the "Add to Cart" buttons
-    document.querySelectorAll(".add-to-cart").forEach(button => {
-        button.addEventListener("click", function () {
-            const productId = this.getAttribute("data-product-id");
-            addToCart(productId, 1); // Default quantity = 1
-        });
-    });
-
-    if (data.pages > 1) {
-        displayPagination(data.q, data.current_page, data.pages);
-    }
-}
-
-function displayPagination(query, currentPage, totalPages) {
-    const paginationContainer = document.getElementById("pagination");
-    paginationContainer.innerHTML = "";
-
-    for (let page = 1; page <= totalPages; page++) {
-        paginationContainer.innerHTML += `
-            <button class="btn btn-outline-primary ${page === currentPage ? 'active' : ''}" onclick="fetchSearchResults('${query}', ${page})">
-                ${page}
-            </button>
-        `;
-    }
-}
-
-function addToCart(productId, quantity) {
-    fetch("/cart/add", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ product_id: productId, quantity: quantity })
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message); // Show success or error message
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("Failed to add product to cart.");
-    });
-}

@@ -30,3 +30,105 @@ main {
     max-width: 100%;
     height: auto;
 }
+
+@media (max-width: 768px) {
+    .cart-summary {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background: #fff;
+        border-top: 1px solid #ccc;
+        padding: 10px;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+}
+
+#mini-cart {
+    border-radius: 12px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#cart-count {
+    display: none;
+}
+
+/* Suggestions dropdown styling */
+#searchSuggestions {
+  display: none;
+  position: absolute;
+  z-index: 1050;
+  width: 100%;
+  background-color: #fff; /* Make sure it's solid white */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-top: 0.2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-height: 300px;
+  overflow-y: auto;
+  opacity: 1;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Limit width to search input */
+.search-bar {
+    position: relative;
+}
+
+.search-bar form {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.search-bar #searchInput {
+    width: 100%;
+}
+
+.search-bar #searchSuggestions {
+    width: 100%;
+}
+
+/* When visible */
+#searchSuggestions.show {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Each suggestion item */
+#searchSuggestions .list-group-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#searchSuggestions .list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+#searchSuggestions .list-group-item img {
+    width: 35px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-right: 0.5rem;
+}
+
+/* Highlighted (keyboard focus) suggestion */
+#searchSuggestions .list-group-item.active,
+#searchSuggestions .list-group-item:hover {
+    background-color: #e9f7ef;
+    color: #198754;
+}

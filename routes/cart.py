@@ -109,9 +109,15 @@ def add_to_cart():
     session['cart'] = cart_dict
     session.modified = True
 
-    return jsonify({'message': 'Item added to cart'}), 201
+    # ✅ Calculate total number of items in the cart
+    cart_count = sum(item['quantity'] for item in cart_dict.values())
 
-@cart_bp.route('remove/<int:product_id>', methods=['POST'])
+    return jsonify({
+        'message': 'Item added to cart',
+        'cart_count': cart_count
+        }), 201
+
+@cart_bp.route('/remove/<int:product_id>', methods=['POST'])
 def remove_from_cart(product_id):
     cart_dict = session.get('cart', {})
     product_id_str = str(product_id)
@@ -119,10 +125,24 @@ def remove_from_cart(product_id):
         del cart_dict[product_id_str]
         session['cart'] = cart_dict
         session.modified = True
-    return jsonify({'message': 'Item removed from cart'})
+
+    # ✅ Calculate new cart count
+    cart_count = sum(item['quantity'] for item in cart_dict.values())
+
+    return jsonify({
+        'message': 'Item removed from cart',
+        'cart_count': cart_count
+    })
 
 @cart_bp.route('/clear', methods=['POST'])
 def clear_cart():
     session['cart'] = {}
     session.modified = True 
     return jsonify({'message': 'Cart cleared'})
+
+@cart_bp.route('/count', methods=['GET'])
+def cart_count():
+    cart = session.get('cart', {})
+    total_items = sum(item['quantity'] for item in cart.values())
+    return jsonify({'cart_count': total_items})
+
