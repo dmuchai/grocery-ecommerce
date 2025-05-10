@@ -9,26 +9,28 @@
         {% for product in products %}
         <div class="col-md-3 col-sm-6 mb-4 d-flex align-items-stretch">
             <div class="card product-card h-100">
-                <img src="{{ product.image_url or '/static/images/default.jpg' }}"
-                     class="card-img-top product-img"
-                     loading="lazy"
-                     decoding="async"
-                     style="height: 200px; width: 100%; object-fit: cover;"
-                     alt="{{ product.name }}">
+		<a href="/products/{{ product.id }}">
+             		<img src="{{ product.image_url or '/static/images/default.jpg' }}"
+                     	class="card-img-top product-img"
+                     	loading="lazy"
+                     	decoding="async"
+                     	style="height: 200px; width: 100%; object-fit: cover;"
+                     	alt="{{ product.name }}">
+		</a>
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate" title="{{ product.name }}">{{ product.name }}</h5>
-                    <p class="card-text text-muted text-truncate" title="{{ product.description }}">
-                        {{ product.description[:50] }}...
-                    </p>
-                    <h6 class="text-success">Kshs {{ product.price }}</h6>
-                    <div class="mt-auto">
-                        <a href="/products/{{ product.id }}" class="btn btn-outline-primary btn-sm w-100 mb-2">View
-                            Details</a>
-                        <button class="btn btn-success btn-sm w-100 add-to-cart" data-id="{{ product.id }}">Add to Cart</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+			<a href="/products/{{ product.id }}" class="text-decoration-none text-dark">
+				<h5 class="card-title text-truncate" title="{{ product.name }}">{{ product.name }}</h5>
+			</a>
+                    	<p class="card-text text-muted text-truncate" title="{{ product.description }}">
+                        	{{ product.description[:50] }}...
+                    	</p>
+                    	<h6 class="text-success">Kshs {{ product.price }}</h6>
+                    	<div class="mt-auto">
+				<button class="btn btn-success btn-sm w-100 add-to-cart" data-id="{{ product.id }}">Add to Cart</button>
+			</div>
+		</div>
+	    </div>
+	</div>
         {% endfor %}
     </div>
 </div>

@@ -4,28 +4,22 @@
 
 {% block content %}
 <!-- Hero Section -->
-<header class="hero bg-success text-white text-center py-5">
-    <div class="container">
-        <h1>Fresh Groceries Delivered to Your Doorstep</h1>
-        <p class="lead">Shop the best quality groceries with ease</p>
+<header class="hero-section position-relative text-white text-center">
+    <img src="{{ url_for('static', filename='images/hero.jpg') }}" class="hero-bg" alt="Fresh grocery delivery" />
+    <div class="hero-overlay d-flex flex-column justify-content-center align-items-center">
+        <h1 class="display-5 fw-bold">Fresh Groceries Delivered to Your Doorstep</h1>
+        <p class="lead">Shop the best quality groceries at the best prices</p>
 
-        <!-- Search Bar -->
-        <div class="search-bar mt-4">
-            <form id="searchForm" class="d-flex justify-content-center position-relative">
-                <div class="position-relative w-50">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search for groceries...">
-                    <div id="searchSuggestions" class="list-group position-absolute w-100"></div>
-                </div>
-                <button type="submit" class="btn btn-light ms-2">Search</button>
-            </form>
-
-            <!-- Search Results Container -->
-            <div id="searchResults" class="container mt-4"></div>
-            <div id="pagination" class="mt-3"></div>
-        </div>
-
-        <!-- Shop Now Button -->
-        <a href="/products" class="btn btn-light mt-3">Shop All Products Here</a>
+        <!-- Search Form -->
+        <form id="searchForm" class="search-form d-flex mt-3 w-100 justify-content-center">
+            <div class="position-relative w-50">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search for groceries..." />
+                <div id="searchSuggestions" class="list-group position-absolute w-100"></div>
+            </div>
+            <button type="submit" class="btn btn-outline-light ms-2">Search</button>
+        </form>
+        <!-- Primary CTA -->
+        <a href="/products" class="btn btn-light mt-4">Shop All Products</a>
     </div>
 </header>
 
@@ -37,7 +31,7 @@
         <div class="col-md-4">
             <div class="card">
                 <a href="/category/vegetables">
-                    <img src="{{ url_for('static', filename='images/vegetables.jpg') }}" class="card-img-top object-fit-cover" alt="Vegetables" loading="lazy" decoding="async" style="height: 200px;">
+                    <img src="{{ url_for('static', filename='images/vegetables.jpg') }}" class="card-img-top object-fit-cover" alt="Vegetables" loading="lazy" decoding="async";">
                 </a>
                 <div class="card-body">
                     <h5 class="card-title">
@@ -53,7 +47,7 @@
         <div class="col-md-4">
             <div class="card">
                 <a href="/category/fruits">
-                    <img src="{{ url_for('static', filename='images/fruits.jpg') }}" class="card-img-top object-fit-cover" alt="Fruits" loading="lazy" decoding="async" style="height: 200px;">
+                    <img src="{{ url_for('static', filename='images/fruits.jpg') }}" class="card-img-top object-fit-cover" alt="Fruits" loading="lazy" decoding="async";">
                 </a>
                 <div class="card-body">
                     <h5 class="card-title">
@@ -69,8 +63,7 @@
         <div class="col-md-4">
             <div class="card">
                 <a href="/category/eggs">
-                    <img src="{{ url_for('static', filename='images/eggs.jpg') }}" class="card-img-top object-fit-cover" alt="Eggs" loading="lazy" decoding="async" style="height: 200px;">
-                </a>
+                    <img src="{{ url_for('static', filename='images/eggs.jpg') }}" class="card-img-top object-fit-cover" alt="Eggs" loading="lazy" decoding="async"</a>
                 <div class="card-body">
                     <h5 class="card-title">
                         <a href="/category/eggs" class="text-decoration-none text-dark">Eggs</a>

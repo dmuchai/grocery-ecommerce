@@ -5,6 +5,10 @@
     border-bottom: 2px solid #198754;
 }
 
+.h1, h1 {
+    font-size: calc(1.375rem + 1.5vw);
+}
+
 /* Responsive tweaks */
 @media (max-width: 768px) {
     .navbar-nav .nav-link {
@@ -15,6 +19,45 @@
     .navbar-brand {
         font-size: 1.5rem;
     }
+}
+
+.card-img-top {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.hero-section {
+  height: 420px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.7;
+  z-index: 0;
+}
+
+.hero-overlay {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.search-form input {
+  background: white;
+  border-radius: 5px;
+}
+
+#searchSuggestions {
+  z-index: 10;
 }
 
 /* Ensure space before footer if content is short */
