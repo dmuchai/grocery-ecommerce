@@ -6,10 +6,10 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6">
-            <img src="{{ product.image_url }}" class="img-fluid rounded" alt="{{ product.name }}">
+		<img src="{{ product.image_url }}" class="img-fluid rounded" alt="{{ product.name }}">
         </div>
         <div class="col-md-6">
-            <h2 id="product-name">{{ product.name }}</h2>
+	    <h2 id="product-name">{{ product.name }}</h2>
             <p id="product-description">{{ product.description }}</p>
             <h4 class="text-success">Kshs <span id="product-price">{{ product.price }}</span></h4>
             <p><strong>Availability:</strong> <span id="product-availability">{% if product.in_stock %}In Stock{% else %}Out of Stock{% endif %}</span></p>
@@ -20,7 +20,7 @@
                 <button class="btn btn-outline-secondary" type="button" id="increase-qty">+</button>
             </div>
             
-            <button id="add-to-cart" class="btn btn-primary">Add to Cart</button>
+            <button class="btn btn-success add-to-cart" data-id="{{ product.id }}">Add to Cart</button>
         </div>
     </div>
 
@@ -35,11 +35,12 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script>
     $(document).ready(function () {
         const productId = "{{ product.id }}";
 
-        // Increase and decrease quantity
+        // Quantity increment/decrement
         $("#increase-qty").click(function () {
             let qty = parseInt($("#quantity").val());
             $("#quantity").val(qty + 1);
@@ -52,22 +53,10 @@
             }
         });
 
-        // Add product to cart
-        $("#add-to-cart").click(function () {
-            let quantity = parseInt($("#quantity").val());
-            $.ajax({
-                url: "/cart/add",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ product_id: productId, quantity: quantity }),
-                success: function (response) {
-                    alert(response.message);
-                },
-                error: function (error) {
-                    console.error("Error:", error);
-                    alert("Failed to add product to cart.");
-                }
-            });
+        // Inject quantity into button dynamically before AJAX call
+        $('.add-to-cart').on('click', function () {
+            const quantity = parseInt($("#quantity").val());
+            $(this).data('quantity', quantity);  // Set the quantity on the button
         });
 
         // Fetch related products
@@ -77,15 +66,18 @@
                 relatedHtml += `
                     <div class="col-md-3">
                         <div class="card product-card">
-                            <img src="${prod.image_url}" class="card-img-top" alt="${prod.name}">
+                            <a href="/products/${prod.id}">
+                                <img src="${prod.image_url || '/static/images/default.jpg'}" class="card-img-top" alt="${prod.name}" style="height: 200px; object-fit: cover;">
+                            </a>
                             <div class="card-body text-center">
-                                <h5 class="card-title"><a href="/products/${prod.id}" class="text-dark text-decoration-none">${prod.name}</a></h5>
+                                <h5 class="card-title">
+                                    <a href="/products/${prod.id}" class="text-dark text-decoration-none">${prod.name}</a>
+                                </h5>
                                 <p class="text-success fw-bold">Kshs ${parseFloat(prod.price).toFixed(2)}</p>
-                                <a href="/products/${prod.id}" class="btn btn-sm btn-outline-primary">View</a>
+                                <button class="btn btn-sm btn-success add-to-cart" data-id="${prod.id}">Add to Cart</button>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
             $("#related-products").html(relatedHtml);
         });

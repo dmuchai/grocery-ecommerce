@@ -4,7 +4,7 @@ $(document).ready(function () {
     // 1. Add to cart handler
     $('.add-to-cart').on('click', function () {
         const productId = $(this).data('id');
-        const quantity = 1;
+	let quantity = $(this).data('quantity') || 1;
 
         $.ajax({
             type: 'POST',
