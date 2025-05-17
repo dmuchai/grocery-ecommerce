@@ -1,10 +1,10 @@
 $(document).ready(function () {
     let autoCloseTimer;
 
-    // 1. Add to cart handler
-    $('.add-to-cart').on('click', function () {
+    // 1. Add to cart handler (event delegation to handle dynamic elements)
+    $(document).on('click', '.add-to-cart', function () {
         const productId = $(this).data('id');
-	let quantity = $(this).data('quantity') || 1;
+        const quantity = $(this).data('quantity') || 1;
 
         $.ajax({
             type: 'POST',
