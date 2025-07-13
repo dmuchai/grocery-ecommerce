@@ -1,8 +1,42 @@
-venv/
-path/to/venv/
-__pycache__/
-*.pyc
+# Environment variables
 .env
-.DS_Store
+.env.local
+.env.production
+.env.staging
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
-path/to/venv/
+env/
+ENV/
+
+# Flask
+instance/
+flask_session/
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/

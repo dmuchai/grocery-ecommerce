@@ -1,81 +1,278 @@
 {% extends "base.html" %}
 
-{% block title %}Denncathy Fresh Basket | Fresh & Organic{% endblock %}
+{% block title %}Fresh Organic Groceries Delivered | Denncathy Fresh Basket{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<header class="hero-section position-relative text-white text-center">
-    <img src="{{ url_for('static', filename='images/hero.jpg') }}" class="hero-bg" alt="Fresh grocery delivery" />
-    <div class="hero-overlay d-flex flex-column justify-content-center align-items-center">
-        <h1 class="display-5 fw-bold">Fresh Groceries Delivered to Your Doorstep</h1>
-        <p class="lead">Shop the best quality groceries at the best prices</p>
+<section class="hero-section position-relative overflow-hidden">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay">
+        <div class="container">
+            <div class="row align-items-center min-vh-100 py-5">
+                <div class="col-lg-6">
+                    <div class="hero-content text-white">
+                        <h1 class="display-4 fw-bold mb-4 animate-fade-in">
+                            Fresh Groceries 
+                            <span class="text-warning">Delivered</span> 
+                            to Your Doorstep
+                        </h1>
+                        <p class="lead mb-4 animate-fade-in-delay">
+                            Shop premium quality fruits, vegetables, and groceries with same-day delivery. 
+                            Fresh from farm to your table.
+                        </p>
+                        
+                        <!-- Search Bar -->
+                        <div class="hero-search mb-4 animate-slide-up">
+                            <form action="/search" method="GET" class="d-flex">
+                                <div class="input-group input-group-lg">
+                                    <input type="text" class="form-control" name="q" 
+                                           placeholder="Search for vegetables, fruits, dairy..." 
+                                           aria-label="Search groceries">
+                                    <button class="btn btn-warning" type="submit">
+                                        <i class="bi bi-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
 
-        <!-- Search Form -->
-        <form id="searchForm" class="search-form d-flex mt-3 w-100 justify-content-center">
-            <div class="position-relative w-50">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search for groceries..." />
-                <div id="searchSuggestions" class="list-group position-absolute w-100"></div>
-            </div>
-            <button type="submit" class="btn btn-outline-light ms-2">Search</button>
-        </form>
-        <!-- Primary CTA -->
-        <a href="/products" class="btn btn-light mt-4">Shop All Products</a>
-    </div>
-</header>
+                        <!-- CTA Buttons -->
+                        <div class="hero-cta animate-slide-up-delay">
+                            <a href="/products" class="btn btn-success btn-lg me-3 mb-2">
+                                <i class="bi bi-shop"></i> Shop Now
+                            </a>
+                            <a href="#features" class="btn btn-outline-light btn-lg mb-2">
+                                <i class="bi bi-play-circle"></i> Learn More
+                            </a>
+                        </div>
 
-<!-- Featured Products -->
-<section id="products" class="container my-5">
-    <h2 class="text-center mb-4">Featured Products</h2>
-    <div class="row">
-        <!-- Vegetables -->
-        <div class="col-md-4">
-            <div class="card">
-                <a href="/category/vegetables">
-                    <img src="{{ url_for('static', filename='images/vegetables.jpg') }}" class="card-img-top object-fit-cover" alt="Vegetables" loading="lazy" decoding="async";">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <a href="/category/vegetables" class="text-decoration-none text-dark">Fresh Vegetables</a>
-                    </h5>
-                    <p class="card-text">Fresh and locally sourced vegetables.</p>
-                    <a href="/category/vegetables" class="btn btn-success">Shop Now</a>
+                        <!-- Trust Indicators -->
+                        <div class="hero-badges mt-4 animate-fade-in-delay">
+                            <span class="badge bg-success me-2">
+                                <i class="bi bi-truck"></i> Free Delivery
+                            </span>
+                            <span class="badge bg-warning text-dark me-2">
+                                <i class="bi bi-clock"></i> Same Day Delivery
+                            </span>
+                            <span class="badge bg-info">
+                                <i class="bi bi-shield-check"></i> Fresh Guarantee
+                            </span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Fruits -->
-        <div class="col-md-4">
-            <div class="card">
-                <a href="/category/fruits">
-                    <img src="{{ url_for('static', filename='images/fruits.jpg') }}" class="card-img-top object-fit-cover" alt="Fruits" loading="lazy" decoding="async";">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <a href="/category/fruits" class="text-decoration-none text-dark">Fruits</a>
-                    </h5>
-                    <p class="card-text">Fresh and juicy fruits.</p>
-                    <a href="/category/fruits" class="btn btn-success">Shop Now</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Eggs -->
-        <div class="col-md-4">
-            <div class="card">
-                <a href="/category/eggs">
-			<img src="{{ url_for('static', filename='images/eggs.jpg') }}" class="card-img-top object-fit-cover" alt="Eggs" loading="lazy" decoding="async" />
-		</a>
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <a href="/category/eggs" class="text-decoration-none text-dark">Eggs</a>
-                    </h5>
-                    <p class="card-text">High-quality eggs for baking and cooking.</p>
-                    <a href="/category/eggs" class="btn btn-success">Shop Now</a>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="hero-image text-center animate-float">
+                        <img src="{{ url_for('static', filename='images/hero-groceries.png') }}" 
+                             alt="Fresh Groceries" class="img-fluid" style="max-height: 500px;">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-6 fw-bold mb-3">Why Choose Denncathy Fresh Basket?</h2>
+                <p class="lead text-muted">Experience the difference with our premium grocery delivery service</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-leaf-fill text-success fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Farm Fresh Quality</h4>
+                    <p class="text-muted">Directly sourced from local farms ensuring maximum freshness and nutrition in every product.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-lightning-charge-fill text-warning fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Lightning Fast Delivery</h4>
+                    <p class="text-muted">Same-day delivery available. Order before 2 PM and get your groceries by evening.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-shield-check-fill text-info fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Quality Guarantee</h4>
+                    <p class="text-muted">100% satisfaction guaranteed or your money back. We stand behind our quality promise.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-6 fw-bold mb-3">Shop by Category</h2>
+                <p class="lead text-muted">Browse our wide selection of fresh groceries</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Vegetables -->
+            <div class="col-lg-4 col-md-6">
+                <div class="category-card h-100 position-relative overflow-hidden rounded-3 shadow-sm">
+                    <a href="/category/vegetables" class="text-decoration-none">
+                        <div class="category-image">
+                            <img src="{{ url_for('static', filename='images/vegetables.jpg') }}" 
+                                 class="img-fluid w-100" alt="Fresh Vegetables" style="height: 250px; object-fit: cover;">
+                        </div>
+                        <div class="category-overlay position-absolute bottom-0 start-0 w-100 p-4 text-white">
+                            <h4 class="fw-bold mb-2">Fresh Vegetables</h4>
+                            <p class="mb-3">Crisp, fresh vegetables sourced daily from local farms</p>
+                            <span class="btn btn-light btn-sm">
+                                <i class="bi bi-arrow-right"></i> Shop Now
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Fruits -->
+            <div class="col-lg-4 col-md-6">
+                <div class="category-card h-100 position-relative overflow-hidden rounded-3 shadow-sm">
+                    <a href="/category/fruits" class="text-decoration-none">
+                        <div class="category-image">
+                            <img src="{{ url_for('static', filename='images/fruits.jpg') }}" 
+                                 class="img-fluid w-100" alt="Fresh Fruits" style="height: 250px; object-fit: cover;">
+                        </div>
+                        <div class="category-overlay position-absolute bottom-0 start-0 w-100 p-4 text-white">
+                            <h4 class="fw-bold mb-2">Premium Fruits</h4>
+                            <p class="mb-3">Sweet, juicy fruits picked at perfect ripeness</p>
+                            <span class="btn btn-light btn-sm">
+                                <i class="bi bi-arrow-right"></i> Shop Now
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dairy -->
+            <div class="col-lg-4 col-md-6">
+                <div class="category-card h-100 position-relative overflow-hidden rounded-3 shadow-sm">
+                    <a href="/category/dairy" class="text-decoration-none">
+                        <div class="category-image">
+                            <img src="{{ url_for('static', filename='images/dairy.jpg') }}" 
+                                 class="img-fluid w-100" alt="Dairy Products" style="height: 250px; object-fit: cover;">
+                        </div>
+                        <div class="category-overlay position-absolute bottom-0 start-0 w-100 p-4 text-white">
+                            <h4 class="fw-bold mb-2">Dairy & More</h4>
+                            <p class="mb-3">Fresh milk, yogurt, cheese and pantry essentials</p>
+                            <span class="btn btn-light btn-sm">
+                                <i class="bi bi-arrow-right"></i> Shop Now
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- View All Products Button -->
+        <div class="text-center mt-5">
+            <a href="/products" class="btn btn-success btn-lg">
+                <i class="bi bi-grid"></i> View All Products
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-6 fw-bold mb-3">What Our Customers Say</h2>
+                <p class="lead text-muted">Join thousands of satisfied customers who trust us for their grocery needs</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card bg-white p-4 rounded-3 shadow-sm h-100">
+                    <div class="stars mb-3">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <p class="mb-3">"Amazing quality vegetables and fruits! The delivery was quick and everything was so fresh. Highly recommend!"</p>
+                    <div class="customer-info">
+                        <strong>Sarah M.</strong>
+                        <small class="text-muted d-block">Nairobi</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card bg-white p-4 rounded-3 shadow-sm h-100">
+                    <div class="stars mb-3">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <p class="mb-3">"Great service and competitive prices. The mobile site works perfectly and ordering is so easy!"</p>
+                    <div class="customer-info">
+                        <strong>John K.</strong>
+                        <small class="text-muted d-block">Kiambu</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card bg-white p-4 rounded-3 shadow-sm h-100">
+                    <div class="stars mb-3">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <p class="mb-3">"Reliable delivery and excellent customer service. My go-to place for all grocery shopping now."</p>
+                    <div class="customer-info">
+                        <strong>Mary W.</strong>
+                        <small class="text-muted d-block">Thika</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 bg-success text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3 class="fw-bold mb-3">Ready to start shopping?</h3>
+                <p class="lead mb-0">Join thousands of customers who trust us for fresh, quality groceries delivered to their doorstep.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a href="/user/register" class="btn btn-light btn-lg me-2">
+                    <i class="bi bi-person-plus"></i> Sign Up
+                </a>
+                <a href="/products" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-shop"></i> Start Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block scripts %}

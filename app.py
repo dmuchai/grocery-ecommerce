@@ -1,10 +1,9 @@
 import json
-from flask import Flask, render_template, session, jsonify, redirect, url_for
+from flask import Flask, render_template, session, jsonify, redirect, url_for, flash
 from flask_migrate import Migrate
 from flask_session import Session
 from models import db, User, Product, Category, Cart
 from config import Config
-from flask_sqlalchemy import SQLAlchemy
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -12,16 +11,13 @@ app = Flask(__name__)
 # Apply configuration from Config class
 app.config.from_object(Config)
 
-#Configure Flask-Session
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
-
 # Initialize database and migrations
 db.init_app(app)
 migrate = Migrate(app, db)
 
-#Ensure sessions work with the database
+# Configure Flask-Session
 app.config['SESSION_SQLALCHEMY'] = db
+Session(app)
 
 # Create the sessions table (run only once)
 with app.app_context():
@@ -122,3 +118,15 @@ def inject_cart_count():
     cart = session.get('cart', {})  # e.g. { "1": { "quantity": 2 }, ... }
     total = sum(item['quantity'] for item in cart.values())
     return dict(cart_count=total)
+
+if __name__ == '__main__':
+    with app.app_context():
+        try:
+            db.create_all()
+            print("✓ Database tables created successfully")
+        except Exception as e:
+            print(f"Database setup error: {e}")
+    
+    print("Starting Grocery Ecommerce App...")
+    print("Access the app at: http://127.0.0.1:5000")
+    app.run(debug=True, host='0.0.0.0', port=5000)

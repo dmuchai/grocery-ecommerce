@@ -1,59 +1,395 @@
-/* Highlight the active nav link */
-.navbar .nav-link.active {
-    font-weight: 600;
-    color: #198754 !important;
-    border-bottom: 2px solid #198754;
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Root Variables */
+:root {
+    --primary-color: #198754;
+    --secondary-color: #6c757d;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
 }
 
-.h1, h1 {
-    font-size: calc(1.375rem + 1.5vw);
+/* Base Styles */
+* {
+    box-sizing: border-box;
 }
 
-/* Responsive tweaks */
-@media (max-width: 768px) {
-    .navbar-nav .nav-link {
-        padding: 0.5rem 1rem;
-        font-size: 1.2rem;
-    }
-
-    .navbar-brand {
-        font-size: 1.5rem;
-    }
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
 }
 
-.card-img-top {
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+.animate-fade-in-delay {
+    animation: fadeIn 1s ease-out 0.3s both;
+}
+
+.animate-slide-up {
+    animation: slideUp 1s ease-out 0.6s both;
+}
+
+.animate-slide-up-delay {
+    animation: slideUp 1s ease-out 0.9s both;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Top Bar */
+.top-bar {
+    font-size: 0.875rem;
+}
+
+/* Navigation Styles */
+.navbar {
+    transition: var(--transition);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    transition: var(--transition);
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: var(--transition);
+    border-radius: 8px;
+    margin: 0 4px;
+    padding: 8px 16px !important;
+}
+
+.nav-link:hover {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: var(--primary-color) !important;
+}
+
+.nav-link.active {
+    background-color: var(--primary-color);
+    color: white !important;
+}
+
+.cart-badge {
+    font-size: 0.75rem;
+    min-width: 20px;
+    height: 20px;
+    line-height: 1;
+}
+
+/* Hero Section */
 .hero-section {
-  height: 420px;
-  position: relative;
-  overflow: hidden;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .hero-bg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0.7;
-  z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #20c997 100%);
+    opacity: 0.9;
+    z-index: -2;
+}
+
+.hero-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../images/hero-pattern.svg') repeat;
+    opacity: 0.1;
+    z-index: 1;
 }
 
 .hero-overlay {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  padding: 0 1rem;
-  text-align: center;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+}
+
+.hero-search .form-control {
+    border: none;
+    border-radius: 12px 0 0 12px;
+    padding: 15px 20px;
+    font-size: 1.1rem;
+    box-shadow: var(--box-shadow);
+}
+
+.hero-search .btn {
+    border-radius: 0 12px 12px 0;
+    padding: 15px 25px;
+    font-weight: 600;
+    border: none;
+    box-shadow: var(--box-shadow);
+}
+
+.hero-badges .badge {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: white;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+    transition: var(--transition);
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+/* Category Cards */
+.category-card {
+    transition: var(--transition);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    position: relative;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+    z-index: 1;
+    transition: var(--transition);
+}
+
+.category-card:hover::before {
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.category-overlay {
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+}
+
+.category-card:hover .category-overlay {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Testimonial Cards */
+.testimonial-card {
+    transition: var(--transition);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Product Cards */
+.card {
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow);
+}
+
+.card-img-top {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: var(--transition);
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #20c997 100%);
+    box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.4);
+}
+
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+}
+
+/* Toast Notifications */
+.toast {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+/* Mini Cart */
+#mini-cart {
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Footer */
+footer {
+    background: linear-gradient(135deg, var(--dark-color) 0%, #495057 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 80vh;
+        text-align: center;
+    }
+    
+    .hero-search .form-control {
+        font-size: 1rem;
+        padding: 12px 16px;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+    
+    .feature-card, .testimonial-card {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-search .input-group {
+        flex-direction: column;
+    }
+    
+    .hero-search .form-control,
+    .hero-search .btn {
+        border-radius: 12px;
+        width: 100%;
+    }
+    
+    .hero-search .btn {
+        margin-top: 10px;
+    }
+    
+    .hero-cta .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Scroll Animations */
+.scroll-animate {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.6s ease-out;
+}
+
+.scroll-animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #157347;
 }
 
 .search-form input {
-  background: white;
-  border-radius: 5px;
+    background: white;
+    border-radius: 5px;
 }
 
 #searchSuggestions {
@@ -174,4 +510,10 @@ main {
 #searchSuggestions .list-group-item:hover {
     background-color: #e9f7ef;
     color: #198754;
+}
+
+#sticky-cart .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
 }

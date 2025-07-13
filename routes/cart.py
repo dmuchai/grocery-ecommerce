@@ -4,6 +4,7 @@ import uuid
 from flask import Blueprint, request, jsonify, session, render_template
 from models import db
 from models.product import Product
+from utils.validation import CartItemSchema, validate_json_input
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -13,10 +14,13 @@ cart_bp = Blueprint('cart', __name__, url_prefix='/cart')
 def initialize_cart():
     """
     Ensure the session has a unique session_id for guests.
-    This is optional if you only use session['cart'].
     """
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())  # Unique ID for guests
+    
+    # Initialize empty cart if not exists
+    if 'cart' not in session:
+        session['cart'] = {}
 
 @cart_bp.route('/', methods=['GET'])
 def get_cart():
@@ -111,10 +115,12 @@ def add_to_cart():
 
     # ✅ Calculate total number of items in the cart
     cart_count = sum(item['quantity'] for item in cart_dict.values())
+    total = sum(item['price'] * item['quantity'] for item in cart_dict.values())
 
     return jsonify({
         'message': 'Item added to cart',
-        'cart_count': cart_count
+        'cart_count': cart_count,
+        'total': total
         }), 201
 
 @cart_bp.route('/remove/<int:product_id>', methods=['POST'])
@@ -144,5 +150,9 @@ def clear_cart():
 def cart_count():
     cart = session.get('cart', {})
     total_items = sum(item['quantity'] for item in cart.values())
-    return jsonify({'cart_count': total_items})
+    total_price = sum(item['price'] * item['quantity'] for item in cart.values())
+    return jsonify({
+        'cart_count': total_items,
+        'total': total_price
+        })
 

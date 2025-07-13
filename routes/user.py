@@ -2,9 +2,27 @@ from flask import Blueprint, request, jsonify, session, render_template, redirec
 from models import db, Cart
 from models.user import User
 from werkzeug.security import generate_password_hash, check_password_hash
+import re
 
 # Users Blueprint
 user_bp = Blueprint('user', __name__)
+
+def validate_password(password):
+    """Validate password strength."""
+    if len(password) < 8:
+        return "Password must be at least 8 characters long."
+    if not re.search(r"[A-Z]", password):
+        return "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return "Password must contain at least one lowercase letter."
+    if not re.search(r"\d", password):
+        return "Password must contain at least one number."
+    return None
+
+def validate_email(email):
+    """Validate email format."""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
 
 # Serve the Register Page
 @user_bp.route('/register', methods=['GET'])
@@ -29,6 +47,15 @@ def register():
             username=username,
             email=email
         ), 400
+
+    # Validate email format
+    if not validate_email(email):
+        return render_template('register.html', error="Invalid email format.", username=username), 400
+
+    # Validate password strength
+    password_error = validate_password(password)
+    if password_error:
+        return render_template('register.html', error=password_error, username=username, email=email), 400
 
     # Check if user already exists
     existing_user = User.query.filter_by(email=email).first()

@@ -1,7 +1,51 @@
 $(document).ready(function () {
-    let autoCloseTimer;
+    // Toggle sticky cart dropdown
+    $('#cart-toggle-btn').on('click', function () {
+        $('#sticky-cart-dropdown').toggleClass('d-none');
+    });
 
-    // 1. Add to cart handler (event delegation to handle dynamic elements)
+    // Update cart count badge
+    function updateCartCount(count) {
+        const cartBadge = $('#sticky-cart-count');
+        if (count > 0) {
+            cartBadge.text(count).show();
+        } else {
+            cartBadge.text('0').hide();
+        }
+    }
+
+    function updateCartTotal(total) {
+	$('#cart-total').text(`KSh${total.toFixed(2)}`);
+    }
+
+    // Load cart content into sticky dropdown
+    function loadStickyCart() {
+        $.get('/cart', function (data) {
+            const cartItems = data.cart || [];
+            const total = data.total || 0;
+            let html = '';
+
+            if (cartItems.length === 0) {
+                html = '<li class="list-group-item text-center">Cart is empty.</li>';
+            } else {
+                cartItems.forEach(item => {
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <small>${item.name}</small><br>
+                                <small class="text-muted">Qty: ${item.quantity}</small>
+                            </div>
+                            <span>Kshs ${(item.price * item.quantity).toFixed(2)}</span>
+                        </li>`;
+                });
+            }
+
+            $('#sticky-cart-items').html(html);
+            $('#sticky-cart-total').text(`Kshs ${total.toFixed(2)}`);
+        });
+    }
+
+    // Add to cart handler (event delegation for dynamic elements)
     $(document).on('click', '.add-to-cart', function () {
         const productId = $(this).data('id');
         const quantity = $(this).data('quantity') || 1;
@@ -10,108 +54,27 @@ $(document).ready(function () {
             type: 'POST',
             url: '/cart/add',
             contentType: 'application/json',
-            data: JSON.stringify({ product_id: productId, quantity: quantity }),
+            data: JSON.stringify({ product_id: productId, quantity }),
             success: function (response) {
                 updateCartCount(response.cart_count || 0);
-                loadMiniCart();
+		updateCartTotal(response.total || 0);
+                loadStickyCart();
 
-                if (response.cart_count > 0) {
-                    $('#toast-message').text(response.message || 'Item added to cart');
-                    $('.toast-container').show();
-                    new bootstrap.Toast(document.getElementById('cart-toast')).show();
-                } else {
-                    $('.toast-container').hide();
-                }
+                $('#toast-message').text(response.message || 'Item added to cart');
+                new bootstrap.Toast(document.getElementById('cart-toast')).show();
             },
             error: function (xhr) {
                 $('#toast-message').text(xhr.responseJSON?.error || 'An error occurred.');
-                $('.toast-container').show();
                 new bootstrap.Toast(document.getElementById('cart-toast')).show();
             }
         });
     });
 
-    // 2. Fetch & render mini-cart
-    function loadMiniCart() {
-        $.get('/cart', function (data) {
-            const cartItems = data.cart || [];
-            const total = data.total || 0;
-            let html = '';
-
-            if (cartItems.length === 0) {
-                $('.toast-container').hide();
-                html = '<li class="list-group-item text-center">Cart is empty.</li>';
-            } else {
-                $('.toast-container').show();
-                cartItems.forEach(item => {
-                    html += `
-                        <li class="list-group-item d-flex justify-content-between align-items-start">
-                            <div>
-                                <small>${item.name}</small><br>
-                                <small class="text-muted">Qty: ${item.quantity}</small>
-                            </div>
-                            <div class="d-flex flex-column align-items-end">
-                                <span>Kshs ${(item.price * item.quantity).toFixed(2)}</span>
-                                <button class="btn btn-sm btn-link text-danger p-0 remove-from-cart" data-id="${item.id}">Remove</button>
-                            </div>
-                        </li>`;
-                });
-            }
-
-            $('#mini-cart-items').html(html);
-            $('#mini-cart-total').text(`Kshs ${total.toFixed(2)}`);
-            $('#mini-cart').fadeIn();
-
-            clearTimeout(autoCloseTimer);
-            autoCloseTimer = setTimeout(() => {
-                $('#mini-cart').fadeOut();
-            }, 5000);
-        });
-    }
-
-    // 3. Remove item from cart handler
-    $('#mini-cart-items').on('click', '.remove-from-cart', function () {
-        const productId = $(this).data('id');
-
-        $.ajax({
-            type: 'POST',
-            url: `/cart/remove/${productId}`,
-            success: function (response) {
-                if (response.cart_count !== undefined) {
-                    updateCartCount(response.cart_count);
-                }
-                loadMiniCart();
-            },
-            error: function () {
-                alert('Could not remove item from cart.');
-            }
-        });
-    });
-
-    // 4. Manual close of mini-cart
-    $('#close-mini-cart').on('click', function () {
-        $('#mini-cart').fadeOut();
-        clearTimeout(autoCloseTimer);
-    });
-
-    // 5. Update cart count badge
-    function updateCartCount(count) {
-        const cartBadge = $('#cart-count');
-
-        if (count > 0) {
-            cartBadge.text(count).show();
-        } else {
-            cartBadge.hide();
-        }
-    }
-
-    // 6. Initial load: cart count
+    // Initial load
     $.get('/cart/count', function (data) {
-        if (data.cart_count !== undefined) {
-            updateCartCount(data.cart_count);
-        }
+	updateCartCount(data.cart ? data.cart.length : 0);
+	updateCartTotal(data.total || 0);
     });
 
-    // 7. Initial load: mini-cart content
-    loadMiniCart();
+    loadStickyCart();
 });
