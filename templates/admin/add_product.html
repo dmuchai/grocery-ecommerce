@@ -1,0 +1,215 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Product - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-plus-circle me-2"></i>Add New Product
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('admin.admin_products') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Products
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-info-circle me-2"></i>Product Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="productForm">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                   placeholder="Enter product name">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" 
+                                      placeholder="Enter product description"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">Price (Kshs) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">Kshs</span>
+                                <input type="number" class="form-control" id="price" name="price" 
+                                       step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="stock" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="stock" name="stock" 
+                                   min="0" required placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-select" id="category_id" name="category_id" required>
+                                <option value="">Select a category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <label for="image" class="form-label">Product Image</label>
+                            <input type="file" class="form-control" id="image" name="image" 
+                                   accept="image/*" onchange="previewImage(this)">
+                            <div class="form-text">Upload a product image (JPG, PNG, GIF - Max 5MB)</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div id="imagePreview" class="text-center" style="display: none;">
+                                <img id="preview" src="" alt="Preview" class="img-thumbnail" 
+                                     style="max-width: 200px; max-height: 200px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="bi bi-check-circle me-2"></i>Add Product
+                            </button>
+                            <a href="{{ url_for('admin.admin_products') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="bi bi-lightbulb me-2"></i>Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle me-2"></i>Product Guidelines</h6>
+                    <ul class="mb-0 small">
+                        <li>Use clear, descriptive product names</li>
+                        <li>Include detailed descriptions to help customers</li>
+                        <li>Set competitive prices for better sales</li>
+                        <li>Upload high-quality product images</li>
+                        <li>Keep stock levels updated regularly</li>
+                        <li>Choose the most appropriate category</li>
+                    </ul>
+                </div>
+
+                <div class="alert alert-warning">
+                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Image Requirements</h6>
+                    <ul class="mb-0 small">
+                        <li>Recommended size: 500x500 pixels</li>
+                        <li>Maximum file size: 5MB</li>
+                        <li>Supported formats: JPG, PNG, GIF</li>
+                        <li>Use well-lit, clear product photos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        {% if categories|length == 0 %}
+        <div class="card shadow mt-3">
+            <div class="card-body text-center">
+                <i class="bi bi-exclamation-circle text-warning" style="font-size: 2rem;"></i>
+                <h6 class="mt-2">No Categories Available</h6>
+                <p class="text-muted small">You need to create categories before adding products.</p>
+                <a href="{{ url_for('admin.admin_categories') }}" class="btn btn-sm btn-warning">
+                    <i class="bi bi-tags me-1"></i>Manage Categories
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Image preview function
+function previewImage(input) {
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreview');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewContainer.style.display = 'block';
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        previewContainer.style.display = 'none';
+    }
+}
+
+// Form validation
+document.getElementById('productForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const price = parseFloat(document.getElementById('price').value);
+    const stock = parseInt(document.getElementById('stock').value);
+    const categoryId = document.getElementById('category_id').value;
+    
+    if (!name) {
+        alert('Please enter a product name');
+        e.preventDefault();
+        return;
+    }
+    
+    if (isNaN(price) || price < 0) {
+        alert('Please enter a valid price');
+        e.preventDefault();
+        return;
+    }
+    
+    if (isNaN(stock) || stock < 0) {
+        alert('Please enter a valid stock quantity');
+        e.preventDefault();
+        return;
+    }
+    
+    if (!categoryId) {
+        alert('Please select a category');
+        e.preventDefault();
+        return;
+    }
+});
+
+// Auto-format price input
+document.getElementById('price').addEventListener('blur', function() {
+    const value = parseFloat(this.value);
+    if (!isNaN(value)) {
+        this.value = value.toFixed(2);
+    }
+});
+</script>
+{% endblock %}

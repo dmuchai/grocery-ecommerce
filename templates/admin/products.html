@@ -1,0 +1,319 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Products Management - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-box-seam me-2"></i>Products Management
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('admin.admin_add_product') }}" class="btn btn-sm btn-success">
+                <i class="bi bi-plus-circle me-1"></i>Add Product
+            </a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="bulkUpdateBtn">
+                <i class="bi bi-pencil-square me-1"></i>Bulk Update
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="search" class="form-label">Search Products</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search }}" placeholder="Search by product name...">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="category" class="form-label">Filter by Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {{ 'selected' if category_filter == category.id|string }}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-list me-2"></i>Products List
+                </h6>
+                <span class="badge bg-info">{{ products.total }} total products</span>
+            </div>
+            <div class="card-body">
+                {% if products.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" id="selectAll" class="form-check-input">
+                                    </th>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products.items %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input product-checkbox" 
+                                               value="{{ product.id }}">
+                                    </td>
+                                    <td>
+                                        {% if product.image_url %}
+                                            <img src="/static/images/{{ product.image_url }}" 
+                                                 alt="{{ product.name }}" 
+                                                 class="rounded" 
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="bi bi-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ product.name }}</strong>
+                                            {% if product.description %}
+                                                <br><small class="text-muted">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ product.category.name if product.category else 'No Category' }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>Kshs {{ "%.2f"|format(product.price) }}</strong>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm stock-input" 
+                                               value="{{ product.stock }}" 
+                                               data-product-id="{{ product.id }}" 
+                                               style="width: 80px;" min="0">
+                                    </td>
+                                    <td>
+                                        {% if product.stock > 10 %}
+                                            <span class="badge bg-success">In Stock</span>
+                                        {% elif product.stock > 0 %}
+                                            <span class="badge bg-warning">Low Stock</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('admin.admin_edit_product', product_id=product.id) }}" 
+                                               class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    title="Delete" onclick="deleteProduct({{ product.id }}, '{{ product.name }}')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if products.pages > 1 %}
+                    <nav aria-label="Products pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if products.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.admin_products', page=products.prev_num, search=search, category=category_filter) }}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in products.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != products.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('admin.admin_products', page=page_num, search=search, category=category_filter) }}">
+                                                {{ page_num }}
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if products.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.admin_products', page=products.next_num, search=search, category=category_filter) }}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-box-seam text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3 text-muted">No products found</h5>
+                        <p class="text-muted">Start by adding your first product to the inventory.</p>
+                        <a href="{{ url_for('admin.admin_add_product') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-2"></i>Add Product
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the product <strong id="productName"></strong>?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete Product
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Select all checkbox functionality
+document.getElementById('selectAll').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+
+// Delete product function
+function deleteProduct(productId, productName) {
+    document.getElementById('productName').textContent = productName;
+    document.getElementById('deleteForm').action = `/admin/products/delete/${productId}`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+// Bulk update functionality
+document.getElementById('bulkUpdateBtn').addEventListener('click', function() {
+    const updates = [];
+    const stockInputs = document.querySelectorAll('.stock-input');
+    
+    stockInputs.forEach(input => {
+        const productId = input.dataset.productId;
+        const stock = parseInt(input.value);
+        updates.push({ id: productId, stock: stock });
+    });
+    
+    if (updates.length === 0) {
+        alert('No products to update');
+        return;
+    }
+    
+    fetch('/admin/products/bulk-update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Products updated successfully!');
+            location.reload();
+        } else {
+            alert('Error updating products: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating products');
+    });
+});
+
+// Auto-save stock changes
+document.querySelectorAll('.stock-input').forEach(input => {
+    input.addEventListener('blur', function() {
+        const productId = this.dataset.productId;
+        const stock = parseInt(this.value);
+        
+        fetch('/admin/products/bulk-update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{ id: productId, stock: stock }])
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show subtle success indication
+                this.style.borderColor = '#28a745';
+                setTimeout(() => {
+                    this.style.borderColor = '';
+                }, 1000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.style.borderColor = '#dc3545';
+        });
+    });
+});
+</script>
+{% endblock %}

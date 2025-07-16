@@ -1,0 +1,290 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Edit Product - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-pencil-square me-2"></i>Edit Product: {{ product.name }}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('admin.admin_products') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Products
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-info-circle me-2"></i>Product Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="productForm">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                   value="{{ product.name }}" placeholder="Enter product name">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" 
+                                      placeholder="Enter product description">{{ product.description or '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">Price (Kshs) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">Kshs</span>
+                                <input type="number" class="form-control" id="price" name="price" 
+                                       step="0.01" min="0" required value="{{ '%.2f'|format(product.price) }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="stock" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="stock" name="stock" 
+                                   min="0" required value="{{ product.stock }}">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-select" id="category_id" name="category_id" required>
+                                <option value="">Select a category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {{ 'selected' if category.id == product.category_id }}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="image" class="form-label">Product Image</label>
+                            <input type="file" class="form-control" id="image" name="image" 
+                                   accept="image/*" onchange="previewImage(this)">
+                            <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF - Max 5MB)</div>
+                        </div>
+                    </div>
+
+                    <!-- Current Image Display -->
+                    {% if product.image_url %}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Current Image</label>
+                            <div class="text-center">
+                                <img src="/static/images/{{ product.image_url }}" alt="{{ product.name }}" 
+                                     class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- New Image Preview -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div id="imagePreview" class="text-center" style="display: none;">
+                                <label class="form-label">New Image Preview</label>
+                                <div>
+                                    <img id="preview" src="" alt="Preview" class="img-thumbnail" 
+                                         style="max-width: 200px; max-height: 200px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="bi bi-check-circle me-2"></i>Update Product
+                            </button>
+                            <a href="{{ url_for('admin.admin_products') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="bi bi-bar-chart me-2"></i>Product Stats
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-12 mb-3">
+                        <div class="border rounded p-3">
+                            <h5 class="text-primary mb-1">{{ product.stock }}</h5>
+                            <small class="text-muted">Current Stock</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle me-2"></i>Stock Status</h6>
+                    {% if product.stock > 10 %}
+                        <span class="badge bg-success">Well Stocked</span>
+                        <p class="small mb-0 mt-2">Product has sufficient inventory.</p>
+                    {% elif product.stock > 0 %}
+                        <span class="badge bg-warning">Low Stock</span>
+                        <p class="small mb-0 mt-2">Consider restocking soon.</p>
+                    {% else %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                        <p class="small mb-0 mt-2">Product is currently unavailable.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="bi bi-lightbulb me-2"></i>Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Update Guidelines</h6>
+                    <ul class="mb-0 small">
+                        <li>Price changes affect future orders only</li>
+                        <li>Stock updates are reflected immediately</li>
+                        <li>Category changes may affect product visibility</li>
+                        <li>Image updates replace the current image</li>
+                        <li>Changes are saved automatically</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-3">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">
+                    <i class="bi bi-trash me-2"></i>Danger Zone
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Once you delete a product, there is no going back. Please be certain.</p>
+                <button type="button" class="btn btn-outline-danger btn-sm w-100" 
+                        onclick="deleteProduct({{ product.id }}, '{{ product.name }}')">
+                    <i class="bi bi-trash me-2"></i>Delete Product
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the product <strong id="productName"></strong>?</p>
+                <p class="text-muted">This action cannot be undone and will remove the product from all orders and inventory.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete Product
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Image preview function
+function previewImage(input) {
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('imagePreview');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewContainer.style.display = 'block';
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        previewContainer.style.display = 'none';
+    }
+}
+
+// Delete product function
+function deleteProduct(productId, productName) {
+    document.getElementById('productName').textContent = productName;
+    document.getElementById('deleteForm').action = `/admin/products/delete/${productId}`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+// Form validation
+document.getElementById('productForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const price = parseFloat(document.getElementById('price').value);
+    const stock = parseInt(document.getElementById('stock').value);
+    const categoryId = document.getElementById('category_id').value;
+    
+    if (!name) {
+        alert('Please enter a product name');
+        e.preventDefault();
+        return;
+    }
+    
+    if (isNaN(price) || price < 0) {
+        alert('Please enter a valid price');
+        e.preventDefault();
+        return;
+    }
+    
+    if (isNaN(stock) || stock < 0) {
+        alert('Please enter a valid stock quantity');
+        e.preventDefault();
+        return;
+    }
+    
+    if (!categoryId) {
+        alert('Please select a category');
+        e.preventDefault();
+        return;
+    }
+});
+
+// Auto-format price input
+document.getElementById('price').addEventListener('blur', function() {
+    const value = parseFloat(this.value);
+    if (!isNaN(value)) {
+        this.value = value.toFixed(2);
+    }
+});
+</script>
+{% endblock %}

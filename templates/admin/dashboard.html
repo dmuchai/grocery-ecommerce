@@ -198,7 +198,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-success w-100">
+                        <a href="{{ url_for('admin.admin_add_product') }}" class="btn btn-success w-100">
                             <i class="bi bi-plus-circle me-2"></i>Add Product
                         </a>
                     </div>
@@ -208,13 +208,13 @@
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-info w-100">
+                        <a href="{{ url_for('admin.admin_products') }}" class="btn btn-info w-100">
                             <i class="bi bi-box me-2"></i>Manage Products
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-secondary w-100">
-                            <i class="bi bi-people me-2"></i>View Customers
+                        <a href="{{ url_for('admin.admin_categories') }}" class="btn btn-secondary w-100">
+                            <i class="bi bi-tags me-2"></i>Manage Categories
                         </a>
                     </div>
                 </div>

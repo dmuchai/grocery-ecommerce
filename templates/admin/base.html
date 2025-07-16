@@ -196,7 +196,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ 'active' if 'products' in request.endpoint }}" href="#">
+                            <a class="nav-link {{ 'active' if 'products' in request.endpoint }}" href="{{ url_for('admin.admin_products') }}">
                                 <i class="bi bi-box-seam"></i>
                                 Products
                             </a>
@@ -214,7 +214,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ 'active' if 'categories' in request.endpoint }}" href="#">
+                            <a class="nav-link {{ 'active' if 'categories' in request.endpoint }}" href="{{ url_for('admin.admin_categories') }}">
                                 <i class="bi bi-tags"></i>
                                 Categories
                             </a>
