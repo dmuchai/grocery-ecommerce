@@ -50,6 +50,10 @@ def home():
 
 @app.route('/category/<category_name>')
 def category_page(category_name):
+    # Special case for dairy - show coming soon placeholder
+    if category_name.lower() == 'dairy':
+        return render_template('category.html', products=[], category_name=category_name, is_coming_soon=True)
+    
     # Query products based on category
     products = Product.query.filter(Product.category.has(name=category_name)).all()    
     if not products:
