@@ -30,6 +30,7 @@ from routes.user import user_bp
 from routes.search import search_bp
 from routes.cart import cart_bp
 from routes.checkout import checkout_bp
+from routes.admin import admin_bp
 
 app.register_blueprint(product_bp, url_prefix="/products")
 app.register_blueprint(order_bp, url_prefix="/order")
@@ -37,6 +38,7 @@ app.register_blueprint(user_bp, url_prefix="/user")
 app.register_blueprint(search_bp, url_prefix="/search")
 app.register_blueprint(cart_bp, url_prefix="/cart")
 app.register_blueprint(checkout_bp, url_prefix="/checkout")
+app.register_blueprint(admin_bp, url_prefix="/admin")
 
 @app.route("/")
 def home():
@@ -128,9 +130,35 @@ if __name__ == '__main__':
         try:
             db.create_all()
             print("✓ Database tables created successfully")
+            
+            # Create default admin user if none exists
+            from models.user import User
+            from werkzeug.security import generate_password_hash
+            
+            admin_exists = User.query.filter_by(role='admin').first()
+            if not admin_exists:
+                try:
+                    admin = User(
+                        username='admin',
+                        email='admin@denncathy.com',
+                        password=generate_password_hash('Admin123!'),
+                        role='admin',
+                        is_active=True
+                    )
+                    db.session.add(admin)
+                    db.session.commit()
+                    print("✓ Default admin user created")
+                    print("  📧 Email: admin@denncathy.com")
+                    print("  🔑 Password: Admin123!")
+                except Exception as e:
+                    print(f"⚠️ Could not create admin user: {e}")
+            else:
+                print("✓ Admin user already exists")
+                
         except Exception as e:
             print(f"Database setup error: {e}")
     
     print("Starting Grocery Ecommerce App...")
     print("Access the app at: http://127.0.0.1:5000")
+    print("Access admin panel at: http://127.0.0.1:5000/admin/login")
     app.run(debug=True, host='0.0.0.0', port=5000)
