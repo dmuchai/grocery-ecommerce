@@ -1,6 +1,57 @@
 // Enhanced JavaScript for better UX
 document.addEventListener('DOMContentLoaded', function() {
     
+    // Enhanced cart real-time updates
+    function enhanceCartExperience() {
+        // Auto-save cart quantity changes
+        let quantityTimeout;
+        $(document).on('input', '.cart-quantity-input', function() {
+            clearTimeout(quantityTimeout);
+            const input = $(this);
+            const productId = input.data('product-id');
+            const quantity = parseInt(input.val());
+            
+            quantityTimeout = setTimeout(() => {
+                if (quantity > 0) {
+                    // Auto-save quantity change
+                    $.ajax({
+                        url: '/cart/update',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            product_id: productId,
+                            quantity: quantity
+                        }),
+                        success: function(response) {
+                            // Update cart badge immediately
+                            $('.cart-badge').text(response.cart_count || 0);
+                            
+                            // Show subtle feedback
+                            input.addClass('border-success');
+                            setTimeout(() => {
+                                input.removeClass('border-success');
+                            }, 1000);
+                        }
+                    });
+                }
+            }, 1000);
+        });
+
+        // Enhanced add to cart button feedback
+        $(document).on('click', '.add-to-cart', function() {
+            const button = $(this);
+            
+            // Add ripple effect
+            const ripple = $('<span class="position-absolute rounded-circle bg-light opacity-75"></span>');
+            button.append(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+    }
+
+    // Initialize cart enhancements
+    enhanceCartExperience();
+    
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
