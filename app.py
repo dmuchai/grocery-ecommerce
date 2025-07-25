@@ -52,16 +52,22 @@ def home():
 
 @app.route('/category/<category_name>')
 def category_page(category_name):
-    # Special case for dairy - show coming soon placeholder
-    if category_name.lower() == 'dairy':
-        return render_template('category.html', products=[], category_name=category_name, is_coming_soon=True)
+    # Map URL-friendly names to database names
+    category_mapping = {
+        'eggs-and-dairy': 'Eggs and Dairy',
+        'vegetables': 'Vegetables',
+        'fruits': 'Fruits'
+    }
+    
+    # Get the actual category name for database lookup
+    actual_category_name = category_mapping.get(category_name.lower(), category_name.title())
     
     # Query products based on category
-    products = Product.query.filter(Product.category.has(name=category_name)).all()    
+    products = Product.query.filter(Product.category.has(name=actual_category_name)).all()    
     if not products:
-        flash(f'No products found in {category_name} category.', 'warning')
+        flash(f'No products found in {actual_category_name} category.', 'warning')
 
-    return render_template('category.html', products=products, category_name=category_name)
+    return render_template('category.html', products=products, category_name=actual_category_name)
 
 @app.route('/category/<category>/products')
 def get_category_products(category):
