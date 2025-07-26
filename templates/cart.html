@@ -23,17 +23,43 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
+        // Import cart update functions from cart.js
+        function updateCartCount(count) {
+            const cartBadge = $('.cart-badge'); // Target the cart badge in navbar
+            if (count > 0) {
+                cartBadge.text(count).show();
+            } else {
+                cartBadge.text('0').hide();
+            }
+            
+            // Also update local cart count display if it exists
+            const localCartCount = $('#cart-count');
+            if (localCartCount.length) {
+                localCartCount.text(count);
+            }
+        }
+
+        function updateCartTotal(total) {
+            $('#cart-total').text(`Kshs ${total.toFixed(2)}`);
+            // Also update sticky cart total if it exists
+            $('#sticky-cart-total').text(`Kshs ${total.toFixed(2)}`);
+        }
+
         function fetchCart() {
             $.get("/cart", function (data) {
                 let cart = data.cart;
                 let totalPrice = data.total;
                 let cartHtml = "";
 
+                // Update navbar cart count
+                const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+                updateCartCount(totalQuantity);
+                updateCartTotal(totalPrice);
+
                 if (cart.length === 0) {
                     $("#cart-container").html("<p>Your cart is empty. <a href='/products'>Start shopping</a>.</p>");
                     $("#cart-summary").hide();
-                    $("#cart-count").text("0");
-                    $('.toast-container').hide();  // 🔥 Hide toast container if cart is empty
+                    $('.toast-container').hide();  // Hide toast container if cart is empty
                     return;
                 }
 
@@ -60,11 +86,8 @@
                 });
 
                 $("#cart-container").html(cartHtml);
-                $("#cart-total").text(`Kshs ${totalPrice.toFixed(2)}`);
                 $("#cart-summary").show();
-                const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-                $("#cart-count").text(totalQuantity);
-                $(".toast-container").show();  // 🔁 Optionally show toast container back if needed
+                $(".toast-container").show();  // Show toast container back if needed
             });
         }
 
@@ -78,7 +101,14 @@
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({ product_id: productId, quantity: change }),
-                success: function () {
+                success: function (response) {
+                    // Update navbar immediately
+                    if (response.cart_count !== undefined) {
+                        updateCartCount(response.cart_count);
+                    }
+                    if (response.total !== undefined) {
+                        updateCartTotal(response.total);
+                    }
                     fetchCart();
                 }
             });
@@ -91,8 +121,19 @@
             $.ajax({
                 url: `/cart/remove/${productId}`,
                 type: "POST",
-                success: function () {
+                success: function (response) {
+                    // Update navbar immediately
+                    if (response.cart_count !== undefined) {
+                        updateCartCount(response.cart_count);
+                    }
+                    if (response.total !== undefined) {
+                        updateCartTotal(response.total);
+                    }
                     fetchCart();
+                    
+                    // Show notification
+                    $('#toast-message').text(response.message || 'Item removed from cart');
+                    new bootstrap.Toast(document.getElementById('cart-toast')).show();
                 }
             });
         });
@@ -102,8 +143,19 @@
             $.ajax({
                 url: "/cart/clear",
                 type: "POST",
-                success: function () {
+                success: function (response) {
+                    // Update navbar immediately
+                    if (response.cart_count !== undefined) {
+                        updateCartCount(response.cart_count);
+                    }
+                    if (response.total !== undefined) {
+                        updateCartTotal(response.total);
+                    }
                     fetchCart();
+                    
+                    // Show notification
+                    $('#toast-message').text(response.message || 'Cart cleared');
+                    new bootstrap.Toast(document.getElementById('cart-toast')).show();
                 }
             });
         });

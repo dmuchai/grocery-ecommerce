@@ -132,19 +132,30 @@ def remove_from_cart(product_id):
         session['cart'] = cart_dict
         session.modified = True
 
-    # ✅ Calculate new cart count
+    # Calculate new cart count and total
     cart_count = sum(item['quantity'] for item in cart_dict.values())
+    total = sum(item['price'] * item['quantity'] for item in cart_dict.values())
 
     return jsonify({
         'message': 'Item removed from cart',
-        'cart_count': cart_count
+        'cart_count': cart_count,
+        'total': total
     })
 
 @cart_bp.route('/clear', methods=['POST'])
 def clear_cart():
     session['cart'] = {}
     session.modified = True 
-    return jsonify({'message': 'Cart cleared'})
+    
+    # Calculate updated cart count and total
+    cart_count = 0
+    total = 0.0
+    
+    return jsonify({
+        'message': 'Cart cleared',
+        'cart_count': cart_count,
+        'total': total
+    })
 
 @cart_bp.route('/count', methods=['GET'])
 def cart_count():
