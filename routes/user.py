@@ -35,27 +35,71 @@ def show_register():
 def register():
     data = request.form
 
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
+    # Required fields
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
 
-    # Validate form input
+    # Optional profile fields
+    first_name = data.get('first_name', '').strip() or None
+    last_name = data.get('last_name', '').strip() or None
+    phone = data.get('phone', '').strip() or None
+    address = data.get('address', '').strip() or None
+    city = data.get('city', '').strip() or None
+    state = data.get('state', '').strip() or None
+    postal_code = data.get('postal_code', '').strip() or None
+    country = data.get('country', '').strip() or None
+
+    # Validate required fields
     if not all([username, email, password]):
         return render_template(
             'register.html',
-            error="All fields are required.",
+            error="All required fields must be filled.",
             username=username,
-            email=email
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            address=address,
+            city=city,
+            state=state,
+            postal_code=postal_code,
+            country=country
         ), 400
 
     # Validate email format
     if not validate_email(email):
-        return render_template('register.html', error="Invalid email format.", username=username), 400
+        return render_template(
+            'register.html', 
+            error="Invalid email format.",
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            address=address,
+            city=city,
+            state=state,
+            postal_code=postal_code,
+            country=country
+        ), 400
 
     # Validate password strength
     password_error = validate_password(password)
     if password_error:
-        return render_template('register.html', error=password_error, username=username, email=email), 400
+        return render_template(
+            'register.html', 
+            error=password_error,
+            username=username, 
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            address=address,
+            city=city,
+            state=state,
+            postal_code=postal_code,
+            country=country
+        ), 400
 
     # Check if user already exists
     existing_user = User.query.filter_by(email=email).first()
@@ -64,14 +108,53 @@ def register():
         flash("An account with this email already exists. Please log in.", "warning")
         return redirect(url_for('user.show_login'))
 
-    # Create and save user
+    # Check if username already exists
+    existing_username = User.query.filter_by(username=username).first()
+    if existing_username:
+        return render_template(
+            'register.html',
+            error="This username is already taken. Please choose another.",
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            address=address,
+            city=city,
+            state=state,
+            postal_code=postal_code,
+            country=country
+        ), 400
+
+    # Create and save user with all provided information
     hashed_password = generate_password_hash(password)
-    new_user = User(username=username, email=email, password=hashed_password)
+    new_user = User(
+        username=username, 
+        email=email, 
+        password=hashed_password,
+        first_name=first_name,
+        last_name=last_name,
+        phone=phone,
+        address=address,
+        city=city,
+        state=state,
+        postal_code=postal_code,
+        country=country
+    )
+    
+    # Update profile completion status
+    new_user.update_profile_completion()
+    
     db.session.add(new_user)
     db.session.commit()
 
     # Log in the user
     session['user_id'] = new_user.id
+
+    # Welcome message based on profile completion
+    if new_user.profile_completed:
+        flash(f"Welcome to Denncathy Fresh Basket, {new_user.get_full_name()}! Your profile is complete.", "success")
+    else:
+        flash(f"Welcome to Denncathy Fresh Basket, {username}! You can complete your profile anytime for faster checkout.", "success")
 
     return redirect(url_for('home'))
 
