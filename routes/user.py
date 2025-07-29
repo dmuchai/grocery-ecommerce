@@ -129,3 +129,72 @@ def logout():
 def forgot_password():
     """Display the forgot password page (placeholder)."""
     return render_template('forgot_password.html')
+
+# Profile Routes
+@user_bp.route('/profile', methods=['GET'])
+def profile():
+    """Display user profile page"""
+    if 'user_id' not in session:
+        flash('Please login to view your profile', 'error')
+        return redirect(url_for('user.show_login'))
+    
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('User not found', 'error')
+        return redirect(url_for('user.show_login'))
+    
+    return render_template('profile.html', user=user)
+
+@user_bp.route('/profile/update', methods=['POST'])
+def update_profile():
+    """Update user profile information"""
+    if 'user_id' not in session:
+        flash('Please login to update your profile', 'error')
+        return redirect(url_for('user.show_login'))
+    
+    user = User.query.get(session['user_id'])
+    if not user:
+        flash('User not found', 'error')
+        return redirect(url_for('user.show_login'))
+    
+    try:
+        # Update user information with validation
+        email = request.form.get('email', '').strip()
+        
+        # Validate email
+        if not validate_email(email):
+            flash('Please enter a valid email address', 'error')
+            return redirect(url_for('user.profile'))
+        
+        # Check if email is already taken by another user
+        existing_user = User.query.filter(User.email == email, User.id != user.id).first()
+        if existing_user:
+            flash('Email address is already in use by another account', 'error')
+            return redirect(url_for('user.profile'))
+        
+        # Update profile fields
+        user.email = email
+        user.first_name = request.form.get('first_name', '').strip() or None
+        user.last_name = request.form.get('last_name', '').strip() or None
+        user.phone = request.form.get('phone', '').strip() or None
+        user.address = request.form.get('address', '').strip() or None
+        user.city = request.form.get('city', '').strip() or None
+        user.state = request.form.get('state', '').strip() or None
+        user.postal_code = request.form.get('postal_code', '').strip() or None
+        user.country = request.form.get('country', 'Kenya')
+        
+        # Update profile completion status
+        user.update_profile_completion()
+        
+        db.session.commit()
+        
+        flash('Profile updated successfully!', 'success')
+        if user.profile_completed:
+            flash('Your profile is now complete! Enjoy faster checkout.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred while updating your profile. Please try again.', 'error')
+        print(f"Profile update error: {e}")
+    
+    return redirect(url_for('user.profile'))

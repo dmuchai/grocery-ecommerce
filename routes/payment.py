@@ -171,14 +171,51 @@ def initiate_payment():
             flash('User not found', 'error')
             return redirect(url_for('user.login'))
         
-        # Get delivery details from checkout (if available) or use defaults
+        # Get delivery details from checkout or user profile with intelligent fallbacks
         delivery_details = session.get('delivery_details', {})
-        customer_name = delivery_details.get('full_name', user.username)
-        customer_email = delivery_details.get('email', user.email)
-        customer_phone = delivery_details.get('phone', '')
-        customer_address = delivery_details.get('address', '')
-        customer_city = delivery_details.get('city', '')
-        customer_postal_code = delivery_details.get('postal_code', '')
+        
+        # Smart fallback system: checkout > user profile > defaults
+        customer_name = (
+            delivery_details.get('full_name') or 
+            user.get_full_name() or 
+            user.username
+        )
+        
+        customer_email = (
+            delivery_details.get('email') or 
+            user.email
+        )
+        
+        customer_phone = (
+            delivery_details.get('phone') or 
+            user.phone or 
+            ''
+        )
+        
+        customer_address = (
+            delivery_details.get('address') or 
+            user.address or 
+            ''
+        )
+        
+        customer_city = (
+            delivery_details.get('city') or 
+            user.city or 
+            ''
+        )
+        
+        customer_postal_code = (
+            delivery_details.get('postal_code') or 
+            user.postal_code or 
+            ''
+        )
+        
+        customer_state = (
+            delivery_details.get('state') or 
+            user.state or 
+            ''
+        )
+        
         delivery_instructions = delivery_details.get('delivery_instructions', '')
         
         # Generate unique order ID

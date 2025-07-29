@@ -93,10 +93,23 @@ def get_cart_from_session_or_db(user_id=None):
 
 @app.route('/cart-data')
 def get_cart_data():
-    cart = get_cart_from_session_or_db()
-    for item in cart.values():
-        item["image_url"] = url_for('static', filename=f'images/{item["image_url"]}', _external=True)
-    return jsonify({"items": list(cart.values())})
+    user_id = session.get('user_id')
+    if user_id:
+        # For logged-in users, get cart from session (it's stored as a dict)
+        cart = session.get('cart', {})
+    else:
+        # For guest users, get cart from session 
+        cart = session.get('cart', {})
+    
+    # Cart is a dictionary with product_id as keys
+    cart_items = []
+    for product_id, item in cart.items():
+        # Only add static URL if image_url doesn't already contain a full URL
+        if not item["image_url"].startswith('http'):
+            item["image_url"] = url_for('static', filename=f'images/{item["image_url"]}')
+        cart_items.append(item)
+    
+    return jsonify({"items": cart_items})
 
 @app.context_processor
 def inject_user():

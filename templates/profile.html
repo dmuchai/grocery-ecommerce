@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% set page_title = "My Profile" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-user me-2"></i>My Profile</h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Profile Completion Status -->
+                    {% if user.profile_completed %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>Your profile is complete!
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Complete your profile to enjoy faster checkout and better service.
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('user.update_profile') }}">
+                        <!-- Basic Information -->
+                        <h5 class="mb-3"><i class="fas fa-user-circle me-2"></i>Basic Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       value="{{ user.username }}" readonly>
+                                <div class="form-text">Username cannot be changed</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ user.email }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       value="{{ user.first_name or '' }}" placeholder="Your first name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="{{ user.last_name or '' }}" placeholder="Your last name">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ user.phone or '' }}" placeholder="e.g., +254701234567">
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Address Information -->
+                        <h5 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Address Information</h5>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Street Address</label>
+                            <input type="text" class="form-control" id="address" name="address" 
+                                   value="{{ user.address or '' }}" placeholder="Street address, apartment, building, etc.">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       value="{{ user.city or '' }}" placeholder="e.g., Nairobi, Mombasa, Kisumu">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="state" class="form-label">State/County</label>
+                                <input type="text" class="form-control" id="state" name="state" 
+                                       value="{{ user.state or '' }}" placeholder="e.g., Nairobi County">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="postal_code" class="form-label">Postal Code</label>
+                                <input type="text" class="form-control" id="postal_code" name="postal_code" 
+                                       value="{{ user.postal_code or '' }}" placeholder="e.g., 00100">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="country" class="form-label">Country</label>
+                            <select class="form-select" id="country" name="country">
+                                <option value="Kenya" {{ 'selected' if user.country == 'Kenya' or not user.country else '' }}>Kenya</option>
+                                <option value="Uganda" {{ 'selected' if user.country == 'Uganda' else '' }}>Uganda</option>
+                                <option value="Tanzania" {{ 'selected' if user.country == 'Tanzania' else '' }}>Tanzania</option>
+                                <option value="Other" {{ 'selected' if user.country == 'Other' else '' }}>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Home
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

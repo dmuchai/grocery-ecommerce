@@ -59,6 +59,35 @@ def checkout_process():
             'error': f'Please fill in all required fields: {", ".join(missing_fields)}'
         }), 400
     
+    # Option to save delivery details to user profile
+    save_to_profile = data.get('save_to_profile', False)
+    if save_to_profile:
+        try:
+            user = User.query.get(session['user_id'])
+            if user:
+                # Parse full name into first and last name if not already set
+                if not user.first_name and not user.last_name:
+                    name_parts = delivery_details['full_name'].split(' ', 1)
+                    user.first_name = name_parts[0]
+                    if len(name_parts) > 1:
+                        user.last_name = name_parts[1]
+                
+                # Update profile with delivery details (only if user fields are empty)
+                if not user.phone:
+                    user.phone = delivery_details['phone']
+                if not user.address:
+                    user.address = delivery_details['address']
+                if not user.city:
+                    user.city = delivery_details['city']
+                if not user.postal_code and delivery_details['postal_code']:
+                    user.postal_code = delivery_details['postal_code']
+                
+                user.update_profile_completion()
+                db.session.commit()
+        except Exception as e:
+            print(f"Error saving to profile: {e}")
+            # Don't fail checkout if profile save fails
+    
     # Store delivery details in session for PesaPal payment processing
     session['delivery_details'] = delivery_details
     session.modified = True
