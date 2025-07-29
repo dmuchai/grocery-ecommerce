@@ -217,7 +217,16 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"Database setup error: {e}")
     
+    # Check if we're in production
+    is_production = app.config.get('FLASK_ENV') == 'production'
+    debug_mode = not is_production
+    
     print("Starting Grocery Ecommerce App...")
-    print("Access the app at: http://127.0.0.1:5000")
-    print("Access admin panel at: http://127.0.0.1:5000/admin/login")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    if not is_production:
+        print("Access the app at: http://127.0.0.1:5000")
+        print("Access admin panel at: http://127.0.0.1:5000/admin/login")
+    else:
+        print("Running in production mode")
+        print("Debug mode disabled for security")
+    
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)

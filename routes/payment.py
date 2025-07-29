@@ -2,9 +2,9 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash,
 import requests
 import jwt
 import json
+import os
 from datetime import datetime, timedelta
 import uuid
-from config_pesapal import PESAPAL_CONFIG
 # Use the same database setup as your main app
 from models import db
 from models.user import User
@@ -16,14 +16,17 @@ payment_bp = Blueprint('payment', __name__)
 
 class PesaPalAPI:
     def __init__(self):
-        self.consumer_key = PESAPAL_CONFIG['consumer_key']
-        self.consumer_secret = PESAPAL_CONFIG['consumer_secret']
-        self.base_url = PESAPAL_CONFIG['base_url']
+        self.consumer_key = os.getenv('PESAPAL_CONSUMER_KEY')
+        self.consumer_secret = os.getenv('PESAPAL_CONSUMER_SECRET')
+        self.base_url = os.getenv('PESAPAL_BASE_URL', 'https://pay.pesapal.com/v3')
+        self.ipn_id = os.getenv('PESAPAL_IPN_ID')
+        self.callback_url = os.getenv('PESAPAL_CALLBACK_URL')
+        self.notification_url = os.getenv('PESAPAL_NOTIFICATION_URL')
         self.auth_token = None
         
     def get_auth_token(self):
         """Get authentication token from PesaPal"""
-        auth_url = f"{self.base_url}{PESAPAL_CONFIG['auth_url']}"
+        auth_url = f"{self.base_url}/api/Auth/RequestToken"
         
         payload = {
             "consumer_key": self.consumer_key,
@@ -54,10 +57,10 @@ class PesaPalAPI:
         if not self.auth_token:
             self.get_auth_token()
             
-        ipn_url = f"{self.base_url}{PESAPAL_CONFIG['register_ipn_url']}"
+        ipn_url = f"{self.base_url}/api/URLSetup/RegisterIPN"
         
         payload = {
-            "url": PESAPAL_CONFIG['notification_url'],
+            "url": self.notification_url,
             "ipn_notification_type": "GET"
         }
         
@@ -82,7 +85,7 @@ class PesaPalAPI:
         if not self.auth_token:
             self.get_auth_token()
             
-        status_url = f"{self.base_url}{PESAPAL_CONFIG['transaction_status_url']}"
+        status_url = f"{self.base_url}/api/Transactions/GetTransactionStatus"
         
         params = {
             'orderTrackingId': order_tracking_id
@@ -108,7 +111,7 @@ class PesaPalAPI:
         if not self.auth_token:
             self.get_auth_token()
             
-        submit_url = f"{self.base_url}{PESAPAL_CONFIG['submit_order_url']}"
+        submit_url = f"{self.base_url}/api/Transactions/SubmitOrderRequest"
         
         headers = {
             'Accept': 'application/json',
@@ -253,13 +256,16 @@ def initiate_payment():
         db.session.commit()
         
         # Prepare PesaPal order data
+        # Create PesaPal API instance
+        pesapal_api = PesaPalAPI()
+        
         order_data = {
             "id": order_id,
             "currency": "KES",
             "amount": float(total_amount),
             "description": f"Denncathy Fresh Basket Order #{order_id}",
-            "callback_url": PESAPAL_CONFIG['callback_url'],
-            "notification_id": PESAPAL_CONFIG['ipn_id'],  # Use stored IPN ID
+            "callback_url": pesapal_api.callback_url,
+            "notification_id": pesapal_api.ipn_id,  # Use stored IPN ID
             "billing_address": {
                 "email_address": customer_email,
                 "phone_number": customer_phone,
