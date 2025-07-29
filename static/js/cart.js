@@ -188,4 +188,46 @@ $(document).ready(function () {
             loadStickyCart();
         }
     });
+
+    // Quantity control handlers for products and category pages
+    $(document).on('click', '.increase-qty', function() {
+        const productId = $(this).data('id');
+        const qtyInput = $(`#qty-${productId}`);
+        let currentQty = parseInt(qtyInput.val()) || 1;
+        qtyInput.val(currentQty + 1);
+    });
+
+    $(document).on('click', '.decrease-qty', function() {
+        const productId = $(this).data('id');
+        const qtyInput = $(`#qty-${productId}`);
+        let currentQty = parseInt(qtyInput.val()) || 1;
+        if (currentQty > 1) {
+            qtyInput.val(currentQty - 1);
+        }
+    });
+
+    // Modified add to cart to use quantity from input
+    $(document).on('click', '.add-to-cart', function () {
+        const productId = $(this).data('id');
+        const qtyInput = $(`#qty-${productId}`);
+        const quantity = qtyInput.length ? parseInt(qtyInput.val()) || 1 : 1;
+
+        $.post('/add_to_cart', {
+            product_id: productId,
+            quantity: quantity
+        }, function (data) {
+            if (data.success) {
+                updateCartCount(data.cart_count);
+                loadStickyCart();
+                showAlert(data.message, 'success');
+                
+                // Reset quantity to 1 after adding to cart
+                if (qtyInput.length) {
+                    qtyInput.val(1);
+                }
+            } else {
+                showAlert(data.message, 'error');
+            }
+        });
+    });
 });
