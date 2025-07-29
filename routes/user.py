@@ -138,7 +138,7 @@ def profile():
         flash('Please login to view your profile', 'error')
         return redirect(url_for('user.show_login'))
     
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     if not user:
         flash('User not found', 'error')
         return redirect(url_for('user.show_login'))
@@ -152,7 +152,7 @@ def update_profile():
         flash('Please login to update your profile', 'error')
         return redirect(url_for('user.show_login'))
     
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     if not user:
         flash('User not found', 'error')
         return redirect(url_for('user.show_login'))

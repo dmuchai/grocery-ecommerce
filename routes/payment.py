@@ -166,7 +166,7 @@ def initiate_payment():
                 })
         
         # Get user details
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if not user:
             flash('User not found', 'error')
             return redirect(url_for('user.login'))

@@ -47,7 +47,7 @@ def home():
     user_email = None
     if 'user_id' in session:
         from models.user import User
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if user:
             user_email = user.email
     return render_template("index.html", is_logged_in=bool(user_email), user_email=user_email)
@@ -94,22 +94,60 @@ def get_cart_from_session_or_db(user_id=None):
 @app.route('/cart-data')
 def get_cart_data():
     user_id = session.get('user_id')
-    if user_id:
-        # For logged-in users, get cart from session (it's stored as a dict)
-        cart = session.get('cart', {})
-    else:
-        # For guest users, get cart from session 
-        cart = session.get('cart', {})
+    cart = session.get('cart', {})
     
     # Cart is a dictionary with product_id as keys
     cart_items = []
     for product_id, item in cart.items():
-        # Only add static URL if image_url doesn't already contain a full URL
-        if not item["image_url"].startswith('http'):
-            item["image_url"] = url_for('static', filename=f'images/{item["image_url"]}')
-        cart_items.append(item)
+        # Create a copy of the item to avoid modifying the original
+        item_copy = item.copy()
+        
+        # Clean up any corrupted URLs and ensure we only have the filename
+        image_url = item_copy.get("image_url", "")
+        
+        # Extract just the filename if URL is corrupted
+        if "http" in image_url:
+            # Extract filename from corrupted URL
+            if "images/" in image_url:
+                filename = image_url.split("images/")[-1]
+                # Remove any additional protocol prefixes
+                if "http" in filename:
+                    filename = filename.split("/")[-1]
+                image_url = filename
+        
+        # Now build the proper URL
+        if image_url and not image_url.startswith('/static'):
+            item_copy["image_url"] = url_for('static', filename=f'images/{image_url}')
+        elif not image_url:
+            item_copy["image_url"] = url_for('static', filename='images/default.jpg')
+        
+        cart_items.append(item_copy)
     
     return jsonify({"items": cart_items})
+
+@app.route('/cart/clean')
+def clean_cart():
+    """Clean up any corrupted cart data with malformed URLs"""
+    cart = session.get('cart', {})
+    cleaned = False
+    
+    for product_id, item in cart.items():
+        if 'image_url' in item and 'http' in item['image_url']:
+            # Extract just the filename
+            image_url = item['image_url']
+            if 'images/' in image_url:
+                filename = image_url.split('images/')[-1]
+                if 'http' in filename:
+                    filename = filename.split('/')[-1]
+                item['image_url'] = filename
+                cleaned = True
+    
+    if cleaned:
+        session['cart'] = cart
+        session.modified = True
+        return jsonify({'message': 'Cart URLs cleaned', 'cart': cart})
+    else:
+        return jsonify({'message': 'Cart URLs are already clean', 'cart': cart})
 
 @app.context_processor
 def inject_user():

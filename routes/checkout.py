@@ -23,7 +23,7 @@ def checkout_page():
         return redirect(url_for('cart.get_cart'))
     
     # Get user details for pre-filling form
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     
     return render_template('checkout.html', cart=cart, user=user)
 
@@ -63,7 +63,7 @@ def checkout_process():
     save_to_profile = data.get('save_to_profile', False)
     if save_to_profile:
         try:
-            user = User.query.get(session['user_id'])
+            user = db.session.get(User, session['user_id'])
             if user:
                 # Parse full name into first and last name if not already set
                 if not user.first_name and not user.last_name:
