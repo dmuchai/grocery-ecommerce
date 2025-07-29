@@ -94,10 +94,17 @@ $(document).ready(function () {
         const productId = $(this).data('id');
         let quantity = $(this).data('quantity') || 1;
         
-        // Check if there's a quantity input field on the page
-        const quantityInput = $('#quantity');
-        if (quantityInput.length && quantityInput.val()) {
-            quantity = parseInt(quantityInput.val()) || 1;
+        // Check for product-specific quantity input first (products/category pages)
+        const productQtyInput = $(`#qty-${productId}`);
+        if (productQtyInput.length && productQtyInput.val()) {
+            quantity = parseInt(productQtyInput.val()) || 1;
+        }
+        // Otherwise check for general quantity input (product detail page)
+        else {
+            const quantityInput = $('#quantity');
+            if (quantityInput.length && quantityInput.val()) {
+                quantity = parseInt(quantityInput.val()) || 1;
+            }
         }
         
         const button = $(this);
@@ -139,6 +146,11 @@ $(document).ready(function () {
                 setTimeout(() => {
                     showMiniCart();
                 }, 500);
+                
+                // Reset quantity input to 1 for products/category pages
+                if (productQtyInput.length) {
+                    productQtyInput.val(1);
+                }
                 
                 // Reset button after 2 seconds
                 setTimeout(() => {
@@ -204,30 +216,5 @@ $(document).ready(function () {
         if (currentQty > 1) {
             qtyInput.val(currentQty - 1);
         }
-    });
-
-    // Modified add to cart to use quantity from input
-    $(document).on('click', '.add-to-cart', function () {
-        const productId = $(this).data('id');
-        const qtyInput = $(`#qty-${productId}`);
-        const quantity = qtyInput.length ? parseInt(qtyInput.val()) || 1 : 1;
-
-        $.post('/add_to_cart', {
-            product_id: productId,
-            quantity: quantity
-        }, function (data) {
-            if (data.success) {
-                updateCartCount(data.cart_count);
-                loadStickyCart();
-                showAlert(data.message, 'success');
-                
-                // Reset quantity to 1 after adding to cart
-                if (qtyInput.length) {
-                    qtyInput.val(1);
-                }
-            } else {
-                showAlert(data.message, 'error');
-            }
-        });
     });
 });
