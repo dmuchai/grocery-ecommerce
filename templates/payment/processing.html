@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Processing - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Processing Icon with Animation -->
+                    <div class="mb-4">
+                        <div class="spinner-border text-warning" style="width: 5rem; height: 5rem;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <h2 class="text-warning mb-3">Payment Processing</h2>
+                    <p class="lead text-muted mb-4">
+                        Your payment is being processed. Please wait while we confirm your transaction.
+                    </p>
+                    
+                    <!-- Order Details -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Order Reference</h5>
+                            <strong>Order ID:</strong><br>
+                            <code>{{ order_id }}</code>
+                        </div>
+                    </div>
+                    
+                    <!-- Processing Steps -->
+                    <div class="alert alert-info mb-4 text-left">
+                        <h6><i class="fas fa-clock"></i> What's happening now:</h6>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                                 role="progressbar" style="width: 75%">
+                                Processing Payment...
+                            </div>
+                        </div>
+                        <ul class="mb-0">
+                            <li>✓ Order details received</li>
+                            <li>✓ Payment gateway processing</li>
+                            <li>⏳ Awaiting bank confirmation</li>
+                            <li>⏳ Final status update</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Important Notice -->
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Please do not close this page or refresh your browser.</strong><br>
+                        We will automatically update you once the payment is confirmed.
+                    </div>
+                    
+                    <!-- Auto-refresh notice -->
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-sync-alt"></i> 
+                            This page will automatically check for updates every 10 seconds.
+                            <br>Last checked: <span id="lastChecked">{{ moment().format('HH:mm:ss') }}</span>
+                        </small>
+                    </div>
+                    
+                    <!-- Manual refresh button -->
+                    <div class="mt-4">
+                        <button onclick="checkPaymentStatus()" class="btn btn-outline-primary" id="refreshBtn">
+                            <i class="fas fa-sync-alt"></i> Check Status Now
+                        </button>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="mt-5 pt-3 border-top">
+                        <small class="text-muted">
+                            Payment taking too long? Contact us at 
+                            <a href="mailto:support@denncathy.co.ke">support@denncathy.co.ke</a> 
+                            or call <a href="tel:+254700000000">+254 700 000 000</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let checkInterval;
+let checkCount = 0;
+const maxChecks = 36; // Check for 6 minutes (36 * 10 seconds)
+
+function checkPaymentStatus() {
+    document.getElementById('lastChecked').textContent = new Date().toLocaleTimeString();
+    document.getElementById('refreshBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+    
+    fetch(`{{ url_for('payment.check_payment_status', order_id=order_id) }}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'completed') {
+                clearInterval(checkInterval);
+                window.location.href = `{{ url_for('payment.payment_callback') }}?OrderMerchantReference={{ order_id }}`;
+            } else if (data.status === 'failed') {
+                clearInterval(checkInterval);
+                window.location.href = `{{ url_for('payment.payment_callback') }}?OrderMerchantReference={{ order_id }}`;
+            }
+            
+            document.getElementById('refreshBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Check Status Now';
+            checkCount++;
+            
+            if (checkCount >= maxChecks) {
+                clearInterval(checkInterval);
+                document.getElementById('refreshBtn').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Timeout - Manual Check Required';
+                document.querySelector('.alert-info').innerHTML = 
+                    '<h6><i class="fas fa-clock"></i> Payment verification timeout:</h6>' +
+                    '<p class="mb-0">Please check your order status manually or contact support.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking payment status:', error);
+            document.getElementById('refreshBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Check Status Now';
+        });
+}
+
+// Auto-check every 10 seconds
+checkInterval = setInterval(checkPaymentStatus, 10000);
+
+// Initial check after 5 seconds
+setTimeout(checkPaymentStatus, 5000);
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Failed - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Failed Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="text-danger mb-3">Payment Failed</h2>
+                    <p class="lead text-muted mb-4">
+                        We're sorry, but your payment could not be processed at this time.
+                    </p>
+                    
+                    <!-- Order Details -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Order Reference</h5>
+                            <strong>Order ID:</strong><br>
+                            <code>{{ order_id }}</code>
+                        </div>
+                    </div>
+                    
+                    <!-- Common reasons -->
+                    <div class="alert alert-warning mb-4 text-left">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Common reasons for payment failure:</h6>
+                        <ul class="mb-0">
+                            <li>Insufficient funds in your account</li>
+                            <li>Card expired or blocked</li>
+                            <li>Network connectivity issues</li>
+                            <li>Transaction limit exceeded</li>
+                            <li>Incorrect payment details</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-redo"></i> Try Payment Again
+                        </a>
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home"></i> Continue Shopping
+                        </a>
+                    </div>
+                    
+                    <!-- Alternative payment methods -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6>Alternative Payment Options:</h6>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-mobile-alt text-success mb-2" style="font-size: 2rem;"></i>
+                                    <br><small>M-Pesa</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-credit-card text-primary mb-2" style="font-size: 2rem;"></i>
+                                    <br><small>Debit/Credit Card</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-university text-info mb-2" style="font-size: 2rem;"></i>
+                                    <br><small>Bank Transfer</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="mt-4 pt-3 border-top">
+                        <small class="text-muted">
+                            Need assistance? Contact our support team at 
+                            <a href="mailto:support@denncathy.co.ke">support@denncathy.co.ke</a> 
+                            or call <a href="tel:+254700000000">+254 700 000 000</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

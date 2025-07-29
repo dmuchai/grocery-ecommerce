@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="text-success mb-3">Payment Successful!</h2>
+                    <p class="lead text-muted mb-4">
+                        Thank you for your order. Your payment has been processed successfully.
+                    </p>
+                    
+                    <!-- Order Details -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Order Details</h5>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <strong>Order ID:</strong><br>
+                                    <code>{{ order_id }}</code>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Transaction ID:</strong><br>
+                                    <code>{{ tracking_id }}</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- What happens next -->
+                    <div class="alert alert-info mb-4">
+                        <h6><i class="fas fa-info-circle"></i> What happens next?</h6>
+                        <ul class="list-unstyled mb-0 text-left">
+                            <li>✓ You will receive an order confirmation email shortly</li>
+                            <li>✓ Our team will prepare your fresh groceries</li>
+                            <li>✓ We'll contact you to schedule delivery</li>
+                            <li>✓ Track your order status in your account</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-home"></i> Continue Shopping
+                        </a>
+                        <a href="{{ url_for('payment.check_payment_status', order_id=order_id) }}" 
+                           class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-receipt"></i> View Order Details
+                        </a>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="mt-4 pt-3 border-top">
+                        <small class="text-muted">
+                            Need help? Contact us at 
+                            <a href="mailto:support@denncathy.co.ke">support@denncathy.co.ke</a> 
+                            or call <a href="tel:+254700000000">+254 700 000 000</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-redirect after 30 seconds -->
+<script>
+    setTimeout(function() {
+        if (confirm('Continue shopping? (You can also view your order details first)')) {
+            window.location.href = "{{ url_for('main.index') }}";
+        }
+    }, 30000); // 30 seconds
+</script>
+{% endblock %}

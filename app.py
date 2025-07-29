@@ -31,6 +31,7 @@ from routes.search import search_bp
 from routes.cart import cart_bp
 from routes.checkout import checkout_bp
 from routes.admin import admin_bp
+from routes.payment import payment_bp
 
 app.register_blueprint(product_bp, url_prefix="/products")
 app.register_blueprint(order_bp, url_prefix="/order")
@@ -39,6 +40,7 @@ app.register_blueprint(search_bp, url_prefix="/search")
 app.register_blueprint(cart_bp, url_prefix="/cart")
 app.register_blueprint(checkout_bp, url_prefix="/checkout")
 app.register_blueprint(admin_bp, url_prefix="/admin")
+app.register_blueprint(payment_bp, url_prefix="/payment")
 
 @app.route("/")
 def home():

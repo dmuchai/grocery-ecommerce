@@ -1,40 +1,74 @@
-from flask import Blueprint, request, jsonify, session, render_template
+from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for, flash
 from models import db
 from models.cart import Cart
 from models.order import Order
 from models.product import Product
+from models.user import User
 from routes.order import place_order as order_placement
 
 checkout_bp = Blueprint('checkout', __name__, url_prefix='/checkout')
 
 @checkout_bp.route('/', methods=['GET'])
 def checkout_page():
-    """Render the checkout page"""
-    cart = session.get('cart', {})  # Get cart items
-    return render_template('checkout.html', cart=cart)
+    """Render the enhanced checkout page"""
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash('Please login to proceed with checkout', 'warning')
+        return redirect(url_for('user.login'))
+    
+    # Check if cart is not empty
+    cart = session.get('cart', {})
+    if not cart:
+        flash('Your cart is empty', 'warning')
+        return redirect(url_for('cart.get_cart'))
+    
+    # Get user details for pre-filling form
+    user = User.query.get(session['user_id'])
+    
+    return render_template('checkout.html', cart=cart, user=user)
 
 @checkout_bp.route('/', methods=['POST'])
 def checkout_process():
-    """Handle checkout and place order"""
+    """Handle checkout form submission and redirect to PesaPal payment"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Please login to continue'}), 401
+    
     cart = session.get('cart', {})
     if not cart:
         return jsonify({'error': 'Cart is empty'}), 400
 
     data = request.get_json()
-    customer_name = data.get('customer_name')
-    email = data.get('email')
-
-    if not customer_name or not email:
-        return jsonify({'error': 'Customer name and email are required'}), 400
-
-    # Redirect order placement to `routes/order.py`
-    response = order_placement()
-
-    if response[1] == 201:  # If order placement is successful
-        session.pop('cart', None)  # Clear cart
-        session.modified = True
-
-    return response
+    
+    # Extract and validate delivery details
+    delivery_details = {
+        'full_name': data.get('full_name', '').strip(),
+        'email': data.get('email', '').strip(),
+        'phone': data.get('phone', '').strip(),
+        'address': data.get('address', '').strip(),
+        'city': data.get('city', '').strip(),
+        'postal_code': data.get('postal_code', '').strip(),
+        'delivery_instructions': data.get('delivery_instructions', '').strip()
+    }
+    
+    # Validate required fields
+    required_fields = ['full_name', 'email', 'phone', 'address', 'city']
+    missing_fields = [field for field in required_fields if not delivery_details[field]]
+    
+    if missing_fields:
+        return jsonify({
+            'error': f'Please fill in all required fields: {", ".join(missing_fields)}'
+        }), 400
+    
+    # Store delivery details in session for PesaPal payment processing
+    session['delivery_details'] = delivery_details
+    session.modified = True
+    
+    # Return success response - frontend will redirect to payment
+    return jsonify({
+        'success': True,
+        'message': 'Delivery details saved. Redirecting to payment...',
+        'redirect_url': url_for('payment.initiate_payment')
+    }), 200
 
 @checkout_bp.route('/success', methods=['GET'])
 def checkout_success():
