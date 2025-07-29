@@ -1,6 +1,15 @@
-{% extends "base.html" %}
-
-{% block title %}{{ category_name|capitalize }} - Denncathy Fresh Basket{% endblock %}
+{% extends "base.html" %		    <p class="card-text text-muted text-truncate" title="{{ product.description }}">{{ product.description[:50] }}...</p>
+		    <h6 class="text-success">Kshs {{ product.price }}</h6>
+		    <div class="mt-auto">
+			    <!-- Quantity Controls -->
+			    <div class="input-group mb-2" style="max-width: 120px; margin: 0 auto;">
+				    <button class="btn btn-outline-secondary btn-sm decrease-qty" type="button" data-id="{{ product.id }}">-</button>
+				    <input type="number" class="form-control form-control-sm text-center quantity-input" 
+					   id="qty-{{ product.id }}" value="1" min="1" style="max-width: 50px;">
+				    <button class="btn btn-outline-secondary btn-sm increase-qty" type="button" data-id="{{ product.id }}">+</button>
+			    </div>
+			    <button class="btn btn-success btn-sm w-100 add-to-cart" data-id="{{ product.id }}">Add to Cart</button>
+		    </div> block title %}{{ category_name|capitalize }} - Denncathy Fresh Basket{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -25,6 +34,13 @@
 			    <p class="card-text text-muted text-truncate" title="{{ product.description }}">{{ product.description[:50] }}...</p>
 			    <h6 class="text-success">Kshs {{ product.price }}</h6>
 			    <div class="mt-auto">
+                        <!-- Quantity Controls -->
+                        <div class="input-group mb-2" style="max-width: 120px; margin: 0 auto;">
+                            <button class="btn btn-outline-secondary btn-sm decrease-qty" type="button" data-id="{{ product.id }}">-</button>
+                            <input type="number" class="form-control form-control-sm text-center quantity-input" 
+                                   id="qty-{{ product.id }}" value="1" min="1" style="max-width: 50px;">
+                            <button class="btn btn-outline-secondary btn-sm increase-qty" type="button" data-id="{{ product.id }}">+</button>
+                        </div>
 				    <button class="btn btn-success btn-sm w-100 add-to-cart" data-id="{{ product.id }}">Add to Cart</button>
 			    </div>
 		    </div>
