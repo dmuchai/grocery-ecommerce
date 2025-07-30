@@ -283,7 +283,8 @@ def initiate_payment():
         # Submit order to PesaPal
         pesapal_response = pesapal_api.submit_order_request(order_data)
         
-        if pesapal_response and pesapal_response.get('status') == '200':
+        # Check if we got a successful response with redirect URL
+        if pesapal_response and pesapal_response.get('redirect_url'):
             # Store order tracking ID in the database
             new_order.status = 'payment_initiated'
             # Store PesaPal tracking ID if you have a field for it
