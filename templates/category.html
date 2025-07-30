@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category_name|capitalize }} - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">{{ category_name|capitalize }}</h2>
+    
+    <!-- Category products display -->
+    <div class="row mt-4">
+        {% for product in products %}
+        <div class="col-md-3 col-sm-6 mb-4 d-flex align-items-stretch">
+            <div class="card h-100 product-card">
+                <a href="/products/{{ product.id }}">
+                    <img src="{{ url_for('static', filename='images/' + (product.image_url or 'default.jpg')) }}"
+                         class="card-img-top product-img"
+                         style="height: 200px; width: 100%; object-fit: cover;"
+                         alt="{{ product.name }}">
+                </a>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-truncate" title="{{ product.name }}">
+                        <a href="/products/{{ product.id }}" class="text-decoration-none text-dark">
+                            {{ product.name }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted text-truncate" title="{{ product.description }}">{{ product.description[:50] }}...</p>
+                    <h6 class="text-success">Kshs {{ product.price }}</h6>
+                    <div class="mt-auto">
+                        <!-- Quantity Controls -->
+                        <div class="input-group mb-2" style="max-width: 140px; margin: 0 auto; display: flex; flex-wrap: nowrap;">
+                            <button class="btn btn-outline-secondary btn-sm decrease-qty" type="button" data-id="{{ product.id }}" style="flex: 0 0 35px; padding: 0.25rem 0.5rem;">-</button>
+                            <input type="number" class="form-control form-control-sm text-center quantity-input" 
+                                   id="qty-{{ product.id }}" value="1" min="1" 
+                                   style="flex: 0 0 50px; font-weight: bold; color: #000; border-left: 0; border-right: 0; padding: 0.25rem;">
+                            <button class="btn btn-outline-secondary btn-sm increase-qty" type="button" data-id="{{ product.id }}" style="flex: 0 0 35px; padding: 0.25rem 0.5rem;">+</button>
+                        </div>
+                        <button class="btn btn-success btn-sm w-100 add-to-cart" data-id="{{ product.id }}">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center text-muted">
+            <p>No products found in this category.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Load external cart logic -->
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+{% endblock %}
