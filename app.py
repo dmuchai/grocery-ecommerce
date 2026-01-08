@@ -42,6 +42,11 @@ app.register_blueprint(checkout_bp, url_prefix="/checkout")
 app.register_blueprint(admin_bp, url_prefix="/admin")
 app.register_blueprint(payment_bp, url_prefix="/payment")
 
+# Register error handlers and setup logging
+from utils.error_handlers import register_error_handlers, setup_logging
+setup_logging(app)
+register_error_handlers(app)
+
 @app.route("/")
 def home():
     user_email = None

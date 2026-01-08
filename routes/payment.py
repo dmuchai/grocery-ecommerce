@@ -3,6 +3,7 @@ import requests
 import jwt
 import json
 import os
+import logging
 from datetime import datetime, timedelta
 import uuid
 # Use the same database setup as your main app
@@ -237,7 +238,8 @@ def initiate_payment():
             email=customer_email,
             address=order_address,
             total_price=total_amount,
-            status='pending'
+            status='pending',
+            merchant_reference=order_id  # Store Pesapal merchant reference
         )
         
         db.session.add(new_order)
@@ -287,10 +289,10 @@ def initiate_payment():
         if pesapal_response and pesapal_response.get('redirect_url'):
             # Store order tracking ID in the database
             new_order.status = 'payment_initiated'
-            # Store PesaPal tracking ID if you have a field for it
+            new_order.pesapal_tracking_id = pesapal_response.get('order_tracking_id')
             db.session.commit()
             
-            # Store order info in session
+            # Store order info in session (for user-facing redirect, not callback)
             session['current_order_id'] = order_id
             session['pesapal_tracking_id'] = pesapal_response.get('order_tracking_id')
             session['db_order_id'] = new_order.id
@@ -311,48 +313,88 @@ def initiate_payment():
 
 @payment_bp.route('/callback')
 def payment_callback():
-    """Handle payment callback from PesaPal"""
-    order_tracking_id = request.args.get('OrderTrackingId')
-    order_merchant_reference = request.args.get('OrderMerchantReference')
+    """
+    Handle payment callback from PesaPal
+    - Server-to-server: Returns 200 OK (stateless, no templates)
+    - Browser redirect: Redirects to /payment/complete for user-facing page
+    """
+    logger = logging.getLogger(__name__)
     
-    if order_tracking_id:
+    order_tracking_id = request.args.get('OrderTrackingId')
+    merchant_ref = request.args.get('OrderMerchantReference')
+    
+    # Detect if this is a browser request (user redirected) or server request (Pesapal IPN)
+    is_browser = request.headers.get('User-Agent', '').startswith('Mozilla') or 'text/html' in request.headers.get('Accept', '')
+    
+    logger.info(f"Payment callback received - Tracking ID: {order_tracking_id}, Reference: {merchant_ref}, Browser: {is_browser}")
+    
+    # Validate required parameters
+    if not order_tracking_id or not merchant_ref:
+        logger.warning(f"Invalid callback - missing parameters. Tracking: {order_tracking_id}, Ref: {merchant_ref}")
+        if is_browser:
+            flash('Invalid payment callback. Please contact support.', 'warning')
+            return redirect(url_for('home'))
+        return "Invalid callback", 400
+    
+    try:
         # Query PesaPal for payment status
         status_response = pesapal_api.get_transaction_status(order_tracking_id)
         
-        if status_response:
-            payment_status = status_response.get('payment_status_description', '').upper()
-            
-            # Update order status in database using SQLAlchemy
-            # Find order by the order reference or session info
-            if 'db_order_id' in session:
-                order = Order.query.get(session['db_order_id'])
-                if order:
-                    order.status = payment_status.lower()
-                    db.session.commit()
-            
-            if payment_status == 'COMPLETED':
-                # Clear cart and delivery details after successful payment
-                session.pop('cart', None)
-                session.pop('delivery_details', None)
-                session.pop('current_order_id', None)
-                session.pop('pesapal_tracking_id', None)
-                session.pop('db_order_id', None)
-                session.modified = True
-                flash('Payment successful! Your order has been confirmed.', 'success')
-                return render_template('payment/success.html', 
-                                     order_id=order_merchant_reference,
-                                     tracking_id=order_tracking_id)
-            elif payment_status == 'FAILED':
-                flash('Payment failed. Please try again.', 'danger')
-                return render_template('payment/failed.html', 
-                                     order_id=order_merchant_reference)
-            else:
-                flash('Payment is being processed. You will be notified once complete.', 'info')
-                return render_template('payment/processing.html', 
-                                     order_id=order_merchant_reference)
+        if not status_response:
+            logger.warning(f"PesaPal returned no status for tracking ID: {order_tracking_id}")
+            if is_browser:
+                return redirect(url_for('payment.payment_complete', 
+                                      OrderTrackingId=order_tracking_id,
+                                      OrderMerchantReference=merchant_ref))
+            return "Verification failed", 200  # Still return 200 to PesaPal
+        
+        payment_status = status_response.get('payment_status_description', '').upper()
+        logger.info(f"Payment status: {payment_status} for tracking ID: {order_tracking_id}, Ref: {merchant_ref}")
+        
+        # Find order by merchant_reference (stored in database)
+        order = Order.query.filter_by(merchant_reference=merchant_ref).first()
+        
+        if not order:
+            logger.error(f"Order not found for merchant_reference: {merchant_ref}")
+            if is_browser:
+                flash('Order not found. Please contact support.', 'warning')
+                return redirect(url_for('home'))
+            return "Order not found", 200  # Still return 200 to PesaPal
+        
+        # Update order only if status hasn't been completed (idempotent)
+        if order.status != 'completed':
+            order.status = payment_status.lower()
+            order.pesapal_tracking_id = order_tracking_id
+            try:
+                db.session.commit()
+                logger.info(f"Order {order.id} (ref: {merchant_ref}) status updated to: {payment_status.lower()}")
+            except Exception as e:
+                logger.error(f"Error updating order status: {str(e)}", exc_info=True)
+                db.session.rollback()
+                if is_browser:
+                    return redirect(url_for('payment.payment_complete', 
+                                          OrderTrackingId=order_tracking_id,
+                                          OrderMerchantReference=merchant_ref))
+                return "Database error", 200  # Still return 200 to PesaPal
+        else:
+            logger.info(f"Order {order.id} (ref: {merchant_ref}) already completed, skipping update")
+        
+        # If browser request, redirect to user-facing completion page
+        if is_browser:
+            return redirect(url_for('payment.payment_complete', 
+                                  OrderTrackingId=order_tracking_id,
+                                  OrderMerchantReference=merchant_ref))
+        
+        # Server-to-server: Always return 200 OK to PesaPal (they expect fast, non-interactive response)
+        return "OK", 200
     
-    flash('Payment status unknown. Please contact support.', 'warning')
-    return redirect(url_for('home'))
+    except Exception as e:
+        logger.error(f"Unexpected error in payment callback: {str(e)}", exc_info=True)
+        db.session.rollback()
+        if is_browser:
+            flash('An error occurred. Please contact support.', 'danger')
+            return redirect(url_for('home'))
+        return "Error", 200  # Still return 200 to PesaPal to prevent retries
 
 @payment_bp.route('/ipn', methods=['GET', 'POST'])
 def payment_ipn():
@@ -375,6 +417,65 @@ def payment_ipn():
             print(f"IPN received - Order: {order_merchant_reference}, Status: {payment_status}")
     
     return '', 200
+
+@payment_bp.route('/complete')
+def payment_complete():
+    """
+    User-facing payment completion page (after Pesapal redirects user back)
+    This route uses session/browser state safely since it's called by user's browser
+    """
+    logger = logging.getLogger(__name__)
+    
+    order_tracking_id = request.args.get('OrderTrackingId')
+    merchant_ref = request.args.get('OrderMerchantReference')
+    
+    # Try to get order info from URL params or session
+    order = None
+    
+    if merchant_ref:
+        # Find order by merchant reference
+        order = Order.query.filter_by(merchant_reference=merchant_ref).first()
+        logger.info(f"Payment complete page - Found order by ref: {merchant_ref}, Order ID: {order.id if order else None}")
+    
+    if not order and 'db_order_id' in session:
+        # Fallback to session
+        order = Order.query.get(session['db_order_id'])
+        logger.info(f"Payment complete page - Found order by session: {order.id if order else None}")
+    
+    if not order:
+        flash('Order not found. Please contact support.', 'warning')
+        return redirect(url_for('home'))
+    
+    # Get latest payment status from Pesapal
+    payment_status = 'processing'
+    if order_tracking_id:
+        try:
+            status_response = pesapal_api.get_transaction_status(order_tracking_id)
+            if status_response:
+                payment_status = status_response.get('payment_status_description', '').upper()
+        except Exception as e:
+            logger.warning(f"Could not fetch payment status: {str(e)}")
+    
+    # Clear cart and delivery details after successful payment
+    if payment_status == 'COMPLETED' and order.status == 'completed':
+        session.pop('cart', None)
+        session.pop('delivery_details', None)
+        session.pop('current_order_id', None)
+        session.pop('pesapal_tracking_id', None)
+        session.pop('db_order_id', None)
+        session.modified = True
+        flash('Payment successful! Your order has been confirmed.', 'success')
+        return render_template('payment/success.html', 
+                             order_id=order.merchant_reference or 'N/A',
+                             tracking_id=order.pesapal_tracking_id or order_tracking_id or 'N/A')
+    elif payment_status == 'FAILED' or order.status == 'failed':
+        flash('Payment failed. Please try again.', 'danger')
+        return render_template('payment/failed.html', 
+                             order_id=order.merchant_reference or 'N/A')
+    else:
+        flash('Payment is being processed. You will be notified once complete.', 'info')
+        return render_template('payment/processing.html', 
+                             order_id=order.merchant_reference or 'N/A')
 
 @payment_bp.route('/cancelled')
 def payment_cancelled():

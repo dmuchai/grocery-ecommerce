@@ -12,6 +12,8 @@ class Order(db.Model):
     address = db.Column(db.String(256), nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default="Pending")  # Pending, Confirmed, Completed
+    merchant_reference = db.Column(db.String(128), nullable=True, unique=True, index=True)  # Pesapal order reference
+    pesapal_tracking_id = db.Column(db.String(128), nullable=True, index=True)  # Pesapal tracking ID
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     # Relationship to OrderItem
@@ -27,6 +29,8 @@ class Order(db.Model):
             "address": self.address,
             "total_price": self.total_price,
             "status": self.status,
+            "merchant_reference": self.merchant_reference,
+            "pesapal_tracking_id": self.pesapal_tracking_id,
             "created_at": self.created_at,
             "items": [item.to_dict() for item in self.items]
         }
