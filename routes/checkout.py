@@ -11,28 +11,22 @@ checkout_bp = Blueprint('checkout', __name__, url_prefix='/checkout')
 @checkout_bp.route('/', methods=['GET'])
 def checkout_page():
     """Render the enhanced checkout page"""
-    # Check if user is logged in
-    if 'user_id' not in session:
-        flash('Please login to proceed with checkout', 'warning')
-        return redirect(url_for('user.login'))
-    
     # Check if cart is not empty
     cart = session.get('cart', {})
     if not cart:
         flash('Your cart is empty', 'warning')
         return redirect(url_for('cart.get_cart'))
     
-    # Get user details for pre-filling form
-    user = db.session.get(User, session['user_id'])
+    # Get user details for pre-filling form if logged in
+    user = None
+    if 'user_id' in session:
+        user = db.session.get(User, session['user_id'])
     
     return render_template('checkout.html', cart=cart, user=user)
 
 @checkout_bp.route('/', methods=['POST'])
 def checkout_process():
     """Handle checkout form submission and redirect to PesaPal payment"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Please login to continue'}), 401
-    
     cart = session.get('cart', {})
     if not cart:
         return jsonify({'error': 'Cart is empty'}), 400
@@ -59,9 +53,9 @@ def checkout_process():
             'error': f'Please fill in all required fields: {", ".join(missing_fields)}'
         }), 400
     
-    # Option to save delivery details to user profile
+    # Option to save delivery details to user profile (only if logged in)
     save_to_profile = data.get('save_to_profile', False)
-    if save_to_profile:
+    if save_to_profile and 'user_id' in session:
         try:
             user = db.session.get(User, session['user_id'])
             if user:
