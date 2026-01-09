@@ -35,7 +35,7 @@ class Product(db.Model):
         - Excludes the current product.
         - Limits the number of related products returned.
         """
-        product = Product.query.get(product_id)
+        product = db.session.get(Product, product_id)
         if not product or not product.category_id:
             return []
 

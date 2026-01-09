@@ -23,7 +23,7 @@ def get_all_products():
 # GET a single product by ID
 @product_bp.route('/<int:product_id>', methods=['GET'])
 def get_product_by_id(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
     product_data = {
@@ -58,7 +58,7 @@ def add_product():
 # PUT/Update an existing product
 @product_bp.route('/<int:product_id>', methods=['PUT'])
 def update_product(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
 
@@ -78,7 +78,7 @@ def update_product(product_id):
 # DELETE a product
 @product_bp.route('/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
 

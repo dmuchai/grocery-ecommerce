@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Return Policy - Denncathy Fresh Basket{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <h1 class="mb-4">Return Policy</h1>
+            
+            <section class="mb-4">
+                <h2>General Returns</h2>
+                <p>At Denncathy Fresh Basket, we want you to be completely satisfied with your purchase. If you're not satisfied with your order, we offer returns within the following conditions:</p>
+            </section>
+
+            <section class="mb-4">
+                <h2>Return Window</h2>
+                <p>Fresh produce and perishable items can be returned within <strong>24 hours</strong> of delivery if they arrive damaged, spoiled, or not as described.</p>
+            </section>
+
+            <section class="mb-4">
+                <h2>Conditions for Returns</h2>
+                <ul>
+                    <li>Products must be in original, unopened packaging (where applicable)</li>
+                    <li>Products must not show signs of consumption or misuse</li>
+                    <li>Return must be initiated within the specified timeframe</li>
+                    <li>Proof of purchase (order number and receipt) must be provided</li>
+                </ul>
+            </section>
+
+            <section class="mb-4">
+                <h2>Damaged or Defective Items</h2>
+                <p>If you receive a damaged or defective item, please:</p>
+                <ol>
+                    <li>Contact us immediately with photos of the damage</li>
+                    <li>Provide your order number and date of delivery</li>
+                    <li>We will arrange a replacement or refund at no additional cost</li>
+                </ol>
+            </section>
+
+            <section class="mb-4">
+                <h2>Refund Process</h2>
+                <p>Once your return is approved:</p>
+                <ul>
+                    <li>You will receive a prepaid return label (for non-food items)</li>
+                    <li>Processing time: 5-7 business days after item receipt</li>
+                    <li>Refunds will be issued to your original payment method</li>
+                    <li>Shipping costs may not be refundable for non-defective items</li>
+                </ul>
+            </section>
+
+            <section class="mb-4">
+                <h2>Non-Returnable Items</h2>
+                <p>The following items cannot be returned:</p>
+                <ul>
+                    <li>Perishable items that have passed their expiry date</li>
+                    <li>Items that show signs of consumption</li>
+                    <li>Items purchased during clearance sales (final sale)</li>
+                </ul>
+            </section>
+
+            <section class="mb-4">
+                <h2>Contact Us</h2>
+                <p>For questions about returns or to initiate a return, please:</p>
+                <ul>
+                    <li>Email: <a href="mailto:support@denncathy.co.ke">support@denncathy.co.ke</a></li>
+                    <li>Phone: <a href="tel:+254712345678">+254 712 345 678</a></li>
+                    <li>Visit our <a href="{{ url_for('contact') }}">Contact page</a></li>
+                </ul>
+            </section>
+
+            <section class="mb-4">
+                <h2>Policy Changes</h2>
+                <p>We reserve the right to modify this return policy at any time. Changes will be posted on this page with an updated effective date.</p>
+                <p><strong>Last Updated:</strong> January 2026</p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

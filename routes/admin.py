@@ -20,7 +20,7 @@ def admin_required(f):
             flash('Please log in to access the admin area.', 'warning')
             return redirect(url_for('admin.login'))
         
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if not user or not user.is_admin():
             flash('Access denied. Admin privileges required.', 'danger')
             return redirect(url_for('admin.login'))
@@ -36,7 +36,7 @@ def seller_required(f):
             flash('Please log in to access this area.', 'warning')
             return redirect(url_for('admin.login'))
         
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if not user or not user.is_admin():
             flash('Access denied. Seller privileges required.', 'danger')
             return redirect(url_for('admin.login'))
@@ -119,7 +119,7 @@ def dashboard():
         'total_customers': total_customers
     }
     
-    current_user = User.query.get(session['user_id'])
+    current_user = db.session.get(User, session['user_id'])
     
     return render_template('admin/dashboard.html', 
                          stats=stats, 
@@ -132,7 +132,7 @@ def dashboard():
 @admin_required
 def profile():
     """Admin profile page"""
-    current_user = User.query.get(session['user_id'])
+    current_user = db.session.get(User, session['user_id'])
     return render_template('admin/profile.html', current_user=current_user)
 
 # Create Default Admin (Development utility)
@@ -187,7 +187,7 @@ def admin_products():
     
     # Get all categories for filter dropdown
     categories = Category.query.all()
-    current_user = User.query.get(session['user_id'])
+    current_user = db.session.get(User, session['user_id'])
     
     return render_template('admin/products.html', 
                          products=products, 
@@ -246,7 +246,7 @@ def admin_add_product():
     
     # Get categories for form
     categories = Category.query.all()
-    current_user = User.query.get(session['user_id'])
+    current_user = db.session.get(User, session['user_id'])
     return render_template('admin/add_product.html', categories=categories, current_user=current_user)
 
 @admin_bp.route('/products/edit/<int:product_id>', methods=['GET', 'POST'])
@@ -288,7 +288,7 @@ def admin_edit_product(product_id):
     
     # Get categories for form
     categories = Category.query.all()
-    current_user = User.query.get(session['user_id'])
+    current_user = db.session.get(User, session['user_id'])
     return render_template('admin/edit_product.html', product=product, categories=categories, current_user=current_user)
 
 @admin_bp.route('/products/delete/<int:product_id>', methods=['POST'])
@@ -322,7 +322,7 @@ def admin_bulk_update_products():
         updates = request.get_json()
         
         for update in updates:
-            product = Product.query.get(update['id'])
+            product = db.session.get(Product, update['id'])
             if product:
                 product.stock = update['stock']
         
@@ -339,7 +339,7 @@ def admin_bulk_update_products():
 def admin_categories():
     """Admin categories management page."""
     categories = Category.query.all()
-    current_user = User.query.get(session['user_id'])
+    current_user = db.session.get(User, session['user_id'])
     return render_template('admin/categories.html', categories=categories, current_user=current_user)
 
 @admin_bp.route('/categories/add', methods=['POST'])

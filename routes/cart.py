@@ -41,7 +41,7 @@ def get_cart():
     # Build a list of items by looking up each product in the DB
     for product_id_str, item_data in cart_dict.items():
         product_id = int(product_id_str)
-        product = Product.query.get(product_id)
+        product = db.session.get(Product, product_id)
         if not product:
             logging.warning(f"Product with ID {product_id} not found in the database!")
             continue
@@ -85,7 +85,7 @@ def add_to_cart():
     if not product_id:
         return jsonify({'error': 'Product ID is required'}), 400
 
-    product = Product.query.get(product_id)
+    product = db.session.get(Product, product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
 

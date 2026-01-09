@@ -156,7 +156,7 @@ def initiate_payment():
         
         # Get products from database to calculate total
         for product_id, cart_item in cart.items():
-            product = Product.query.get(int(product_id))
+            product = db.session.get(Product, int(product_id))
             if product:
                 quantity = cart_item['quantity']  # Extract quantity from cart item dict
                 item_total = product.price * quantity
@@ -439,7 +439,7 @@ def payment_complete():
     
     if not order and 'db_order_id' in session:
         # Fallback to session
-        order = Order.query.get(session['db_order_id'])
+        order = db.session.get(Order, session['db_order_id'])
         logger.info(f"Payment complete page - Found order by session: {order.id if order else None}")
     
     if not order:

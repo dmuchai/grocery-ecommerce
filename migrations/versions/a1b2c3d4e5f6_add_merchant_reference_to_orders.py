@@ -1,7 +1,7 @@
 """Add merchant_reference and pesapal_tracking_id to orders
 
 Revision ID: a1b2c3d4e5f6
-Revises: 2c5ae49b0097
+Revises: 5c05eaab1928
 Create Date: 2025-01-27 12:00:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'a1b2c3d4e5f6'
-down_revision = '2c5ae49b0097'
+down_revision = '5c05eaab1928'
 branch_labels = None
 depends_on = None
 
