@@ -29,7 +29,8 @@ def register_error_handlers(app):
     
     @app.errorhandler(404)
     def not_found_error(error):
-        app.logger.warning(f'404 error: {error}')
+        from flask import request
+        app.logger.warning(f'404 error: {request.path} - {error}')
         return render_template('errors/404.html'), 404
     
     @app.errorhandler(500)
