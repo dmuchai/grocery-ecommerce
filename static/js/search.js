@@ -3,6 +3,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchForm = document.getElementById("searchForm");
     const suggestionsBox = document.getElementById("searchSuggestions");
 
+    // Exit early if search elements don't exist on this page
+    if (!searchInput || !searchForm || !suggestionsBox) {
+        return;
+    }
+
     let debounceTimer;
     let activeIndex = -1; // Track selected suggestion
 
