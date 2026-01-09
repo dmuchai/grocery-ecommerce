@@ -137,10 +137,6 @@ pesapal_api = PesaPalAPI()
 def initiate_payment():
     """Initiate payment process"""
     
-    if 'user_id' not in session:
-        flash('Please login to continue with payment', 'warning')
-        return redirect(url_for('user.login'))
-    
     try:
         # Get cart items from session (as your app currently uses)
         cart = session.get('cart', {})
@@ -169,54 +165,58 @@ def initiate_payment():
                     'total': item_total
                 })
         
-        # Get user details
-        user = db.session.get(User, session['user_id'])
-        if not user:
-            flash('User not found', 'error')
-            return redirect(url_for('user.login'))
+        # Get user details if logged in, otherwise use delivery details from session
+        user = None
+        if 'user_id' in session:
+            user = db.session.get(User, session['user_id'])
         
         # Get delivery details from checkout or user profile with intelligent fallbacks
         delivery_details = session.get('delivery_details', {})
         
+        # For guest users, delivery_details must be present
+        if not user and not delivery_details:
+            flash('Please provide delivery details', 'error')
+            return redirect(url_for('checkout.checkout_page'))
+        
         # Smart fallback system: checkout > user profile > defaults
         customer_name = (
             delivery_details.get('full_name') or 
-            user.get_full_name() or 
-            user.username
+            (user.get_full_name() if user else None) or
+            (user.username if user else 'Guest Customer')
         )
         
         customer_email = (
             delivery_details.get('email') or 
-            user.email
+            (user.email if user else 'guest@denncathy.co.ke')
         )
         
         customer_phone = (
             delivery_details.get('phone') or 
-            user.phone or 
+            (user.phone if user else '') or
             ''
         )
         
         customer_address = (
             delivery_details.get('address') or 
-            user.address or 
+            (user.address if user else '') or
             ''
         )
         
         customer_city = (
             delivery_details.get('city') or 
-            user.city or 
+            (user.city if user else '') or
             ''
         )
         
         customer_postal_code = (
             delivery_details.get('postal_code') or 
-            user.postal_code or 
+            (user.postal_code if user else '') or
             ''
         )
         
         customer_state = (
             delivery_details.get('state') or 
-            user.state or 
+            (user.state if user else '') or
             ''
         )
         
@@ -233,7 +233,7 @@ def initiate_payment():
             order_address += f" (Instructions: {delivery_instructions})"
             
         new_order = Order(
-            user_id=session['user_id'],
+            user_id=session.get('user_id'),  # None for guest users
             customer_name=customer_name,
             email=customer_email,
             address=order_address,
