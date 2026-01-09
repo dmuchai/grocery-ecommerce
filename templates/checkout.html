@@ -229,10 +229,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Handle checkout form submission
-    document.getElementById("checkout-form").addEventListener("submit", function (event) {
+    const checkoutForm = document.getElementById("checkout-form");
+    if (!checkoutForm) {
+        console.error("Checkout form not found");
+        return;
+    }
+    
+    checkoutForm.addEventListener("submit", function (event) {
         event.preventDefault();
         
         const submitBtn = document.getElementById("proceed-payment-btn");
+        if (!submitBtn) {
+            console.error("Submit button not found");
+            return;
+        }
+        
         const originalText = submitBtn.innerHTML;
         
         // Show loading state

@@ -28,6 +28,14 @@ class Config:
         f"mysql+pymysql://{DATABASE_USER}:{DB_PASSWORD_ENCODED}@{DATABASE_HOST}/{DATABASE_NAME}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # SQLAlchemy Engine Options - Prevent "MySQL server has gone away"
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,      # Verify connections before using
+        'pool_recycle': 280,         # Recycle connections before MySQL timeout (default 300s)
+        'pool_size': 10,             # Maximum number of connections
+        'max_overflow': 20           # Maximum overflow connections
+    }
 
     # Flask-Session Config (SQLAlchemy)
     SESSION_TYPE = "sqlalchemy"
