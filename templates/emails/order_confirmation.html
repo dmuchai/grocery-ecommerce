@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .order-ref {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .order-ref strong {
+            display: block;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .order-ref code {
+            font-size: 16px;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .items-table th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .cta-button:hover {
+            background-color: #218838;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #dee2e6;
+        }
+        .contact-info {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✓ Order Confirmed</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hi <strong>{{ order.customer_name }}</strong>,</p>
+            
+            <p>Thank you for your order! We're excited to deliver fresh, quality groceries to your doorstep. We've received your order and it's being prepared for shipment.</p>
+            
+            <div class="order-ref">
+                <strong>Order Reference Number:</strong>
+                <code>{{ order.merchant_reference }}</code>
+            </div>
+            
+            <h3 style="margin-top: 30px; color: #333;">Order Summary</h3>
+            
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="text-align: right;">Qty</th>
+                        <th style="text-align: right;">Price</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td style="text-align: right;">{{ item.quantity }}</td>
+                        <td style="text-align: right;">KES {{ "%.2f"|format(item.price) }}</td>
+                        <td style="text-align: right;">KES {{ "%.2f"|format(item.quantity * item.price) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">Total Amount:</td>
+                        <td style="text-align: right;">KES {{ "%.2f"|format(order.total_price) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3 style="margin-top: 30px; color: #333;">Delivery Details</h3>
+            <p>
+                <strong>Delivery Address:</strong><br>
+                {{ order.address }}<br><br>
+                <strong>Expected Delivery:</strong><br>
+                Within 2-3 business days
+            </p>
+            
+            <center>
+                <a href="https://denncathy.co.ke/order/track/{{ order.merchant_reference }}" class="cta-button">
+                    Track Your Order
+                </a>
+            </center>
+            
+            <div class="contact-info">
+                <strong>Next Steps:</strong><br>
+                1. Your order is being prepared<br>
+                2. We'll send you a shipping notification<br>
+                3. Track your delivery in real-time<br>
+                4. We'll contact you on delivery day
+            </div>
+            
+            <p style="color: #666; margin-top: 30px;">
+                If you have any questions about your order, please reply to this email or contact us at 
+                <strong>+254 710 583 101</strong> (7 AM - 7 PM, Mon-Sun).
+            </p>
+            
+            <p>
+                Best regards,<br>
+                <strong>The Denncathy Fresh Basket Team</strong><br>
+                🥬 Fresh from Farm to Your Table 🥬
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Denncathy Fresh Basket. All rights reserved.</p>
+            <p>This is an automated email. Please do not reply with sensitive information.</p>
+        </div>
+    </div>
+</body>
+</html>

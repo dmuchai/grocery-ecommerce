@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .alert-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .items-table th {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+        }
+        .items-table td {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .action-link {
+            display: inline-block;
+            background-color: #ff6b35;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🚨 NEW ORDER RECEIVED</h2>
+        </div>
+        
+        <div class="content">
+            <div class="alert-box">
+                <h3 style="margin-top: 0; color: #856404;">
+                    Order #{{ order.merchant_reference }}
+                </h3>
+                <p style="margin: 5px 0;">
+                    <strong>Customer:</strong> {{ order.customer_name }}<br>
+                    <strong>Phone:</strong> {{ order.phone or 'N/A' }}<br>
+                    <strong>Email:</strong> {{ order.email }}<br>
+                    <strong>Time:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                </p>
+            </div>
+            
+            <h3>Order Summary</h3>
+            
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="text-align: right;">Qty</th>
+                        <th style="text-align: right;">Price</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td style="text-align: right;">{{ item.quantity }}</td>
+                        <td style="text-align: right;">KES {{ "%.2f"|format(item.price) }}</td>
+                        <td style="text-align: right;">KES {{ "%.2f"|format(item.quantity * item.price) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">TOTAL:</td>
+                        <td style="text-align: right;">KES {{ "%.2f"|format(order.total_price) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Delivery Details</h3>
+            <p>
+                <strong>Address:</strong> {{ order.address }}<br>
+                <strong>Status:</strong> <span style="background-color: #fff3cd; padding: 3px 8px; border-radius: 3px; color: #856404;">{{ order.status|upper }}</span>
+            </p>
+            
+            <center>
+                <a href="https://denncathy.co.ke/admin/orders/{{ order.id }}" class="action-link">
+                    View Order in Admin Panel
+                </a>
+            </center>
+            
+            <h3>Quick Actions</h3>
+            <ul>
+                <li>Confirm items are in stock</li>
+                <li>Pick and pack the order</li>
+                <li>Update status to "shipped" when dispatched</li>
+                <li>Keep track of delivery time window</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated alert for new orders. Login to admin dashboard for full order management.</p>
+        </div>
+    </div>
+</body>
+</html>

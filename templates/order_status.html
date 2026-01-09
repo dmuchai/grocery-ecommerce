@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- Order Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Order Status</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Order Reference:</strong><br>
+                                <code style="font-size: 14px;">{{ order.merchant_reference }}</code>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Order Date:</strong><br>
+                                {{ order.created_at.strftime('%d %B %Y, %H:%M') }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Status:</strong><br>
+                                <span class="badge" style="background-color: {% if order.status == 'completed' %}#28a745{% elif order.status == 'failed' %}#dc3545{% elif order.status == 'cancelled' %}#6c757d{% else %}#ffc107{% endif %}; padding: 8px 12px; font-size: 14px;">
+                                    {{ order.status|upper }}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Total Amount:</strong><br>
+                                <span style="font-size: 18px; font-weight: bold; color: #28a745;">KES {{ "%.2f"|format(order.total_price) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Items Ordered</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th>Product</th>
+                                    <th style="text-align: right;">Qty</th>
+                                    <th style="text-align: right;">Price</th>
+                                    <th style="text-align: right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ item.product.name }}</strong>
+                                    </td>
+                                    <td style="text-align: right;">{{ item.quantity }}</td>
+                                    <td style="text-align: right;">KES {{ "%.2f"|format(item.price) }}</td>
+                                    <td style="text-align: right; font-weight: bold;">KES {{ "%.2f"|format(item.quantity * item.price) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <hr>
+                    <div style="text-align: right; font-size: 16px; font-weight: bold;">
+                        Total: KES {{ "%.2f"|format(order.total_price) }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📍 Delivery Address</h5>
+                </div>
+                <div class="card-body">
+                    <strong>{{ order.customer_name }}</strong><br>
+                    {{ order.address }}<br><br>
+                    {% if order.phone %}
+                    <strong>Phone:</strong> {{ order.phone }}<br>
+                    {% endif %}
+                    <strong>Email:</strong> {{ order.email }}
+                </div>
+            </div>
+
+            <!-- Status Timeline -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📦 Order Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div style="padding: 15px 0;">
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                            <div style="width: 30px; height: 30px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; flex-shrink: 0;">✓</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold;">Order Placed</h6>
+                                <small style="color: #666;">{{ order.created_at.strftime('%d %B %Y at %H:%M') }}</small>
+                            </div>
+                        </div>
+
+                        {% if order.status != 'pending' and order.status != 'payment_initiated' and order.status != 'failed' %}
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                            <div style="width: 30px; height: 30px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; flex-shrink: 0;">✓</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold;">Payment Received</h6>
+                                <small style="color: #666;">Payment confirmed successfully</small>
+                            </div>
+                        </div>
+                        {% elif order.status == 'payment_initiated' %}
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                            <div style="width: 30px; height: 30px; background-color: #ffc107; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #333; font-weight: bold; margin-right: 15px; flex-shrink: 0;">⏳</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold; color: #ffc107;">Awaiting Payment</h6>
+                                <small style="color: #666;">Waiting for payment confirmation</small>
+                            </div>
+                        </div>
+                        {% elif order.status == 'failed' %}
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                            <div style="width: 30px; height: 30px; background-color: #dc3545; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; flex-shrink: 0;">✕</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold; color: #dc3545;">Payment Failed</h6>
+                                <small style="color: #666;">Please retry payment</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if order.status == 'shipped' or order.status == 'delivered' %}
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                            <div style="width: 30px; height: 30px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; flex-shrink: 0;">✓</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold;">Order Shipped</h6>
+                                <small style="color: #666;">Your order is on its way!</small>
+                            </div>
+                        </div>
+                        {% elif order.status != 'pending' and order.status != 'payment_initiated' %}
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+                            <div style="width: 30px; height: 30px; background-color: #ffc107; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #333; font-weight: bold; margin-right: 15px; flex-shrink: 0;">⏳</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold; color: #ffc107;">Being Prepared</h6>
+                                <small style="color: #666;">We're picking and packing your items</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if order.status == 'delivered' %}
+                        <div style="display: flex; align-items: flex-start;">
+                            <div style="width: 30px; height: 30px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; flex-shrink: 0;">✓</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold;">Delivered</h6>
+                                <small style="color: #666;">Order delivered successfully</small>
+                            </div>
+                        </div>
+                        {% elif order.status != 'cancelled' %}
+                        <div style="display: flex; align-items: flex-start;">
+                            <div style="width: 30px; height: 30px; background-color: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #666; font-weight: bold; margin-right: 15px; flex-shrink: 0;">○</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold; color: #999;">Expected Delivery</h6>
+                                <small style="color: #666;">{{ estimated_delivery.strftime('%d %B %Y') }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if order.status == 'cancelled' %}
+                        <div style="display: flex; align-items: flex-start;">
+                            <div style="width: 30px; height: 30px; background-color: #6c757d; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; flex-shrink: 0;">✕</div>
+                            <div>
+                                <h6 style="margin: 0 0 5px 0; font-weight: bold; color: #6c757d;">Order Cancelled</h6>
+                                <small style="color: #666;">Refund will be processed within 3-5 business days</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estimated Delivery Notice -->
+            {% if order.status not in ['cancelled', 'failed'] %}
+            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <strong style="color: #155724;">📅 Expected Delivery: {{ estimated_delivery.strftime('%d %B %Y') }}</strong><br>
+                <small style="color: #155724;">We'll call you on the delivery day to confirm the best time window</small>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px;">
+                {% if order.status in ['pending', 'payment_initiated', 'failed'] %}
+                <button class="btn btn-warning" onclick="retryPayment()">
+                    <span style="margin-right: 5px;">🔄</span>Retry Payment
+                </button>
+                {% endif %}
+
+                {% if order.status in ['pending', 'payment_initiated', 'failed'] %}
+                <button class="btn btn-danger" onclick="cancelOrder()">
+                    <span style="margin-right: 5px;">❌</span>Cancel Order
+                </button>
+                {% endif %}
+
+                <a href="/" class="btn btn-secondary">
+                    <span style="margin-right: 5px;">🏠</span>Back to Home
+                </a>
+            </div>
+
+            <!-- Contact Support -->
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+                <h6 style="margin-bottom: 10px;">Need Help?</h6>
+                <p style="margin: 0 0 10px 0; color: #666;">Contact us anytime</p>
+                <p style="margin: 0;">
+                    <strong style="font-size: 18px;">📞 +254 710 583 101</strong><br>
+                    <small style="color: #666;">Monday - Sunday, 7 AM - 7 PM</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function retryPayment() {
+    if (!confirm('You will be redirected to the payment page. Continue?')) return;
+    
+    fetch(`/orders/{{ order.id }}/retry-payment`, {
+        method: 'POST'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            alert('Error: ' + (data.error || 'Failed to retry payment'));
+        }
+    })
+    .catch(e => alert('Error: ' + e.message));
+}
+
+function cancelOrder() {
+    if (!confirm('Are you sure? This will cancel your order and initiate a refund.\n\nRefund will be processed within 3-5 business days.')) return;
+    
+    fetch(`/orders/{{ order.id }}/cancel`, {
+        method: 'POST'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to cancel order'));
+        }
+    })
+    .catch(e => alert('Error: ' + e.message));
+}
+</script>
+
+<style>
+    .badge {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        border: none;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        color: #333;
+    }
+    
+    .btn-warning:hover {
+        background-color: #e0a800;
+        color: #333;
+    }
+    
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background-color: #c82333;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+    
+    code {
+        background-color: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}

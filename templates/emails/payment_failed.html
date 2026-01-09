@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .alert-box {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #721c24;
+        }
+        .retry-button {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>⚠️ Payment Failed</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hi <strong>{{ order.customer_name }}</strong>,</p>
+            
+            <p>Unfortunately, your payment for order <strong>{{ order.merchant_reference }}</strong> could not be processed.</p>
+            
+            <div class="alert-box">
+                <h3 style="margin-top: 0;">What Happened?</h3>
+                <p>Your payment was declined by the payment processor. This could be due to:</p>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Insufficient funds in your account</li>
+                    <li>Card details not matching</li>
+                    <li>Temporary connectivity issues</li>
+                    <li>Security restrictions on your card</li>
+                </ul>
+            </div>
+            
+            <h3 style="color: #333;">What You Can Do</h3>
+            <p>Don't worry! Your order is reserved for you. You have <strong>30 minutes</strong> to retry the payment:</p>
+            
+            <center>
+                <a href="https://denncathy.co.ke/order/track/{{ order.merchant_reference }}" class="retry-button">
+                    Retry Payment Now
+                </a>
+            </center>
+            
+            <div class="info-box">
+                <strong>Tips to Resolve:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Check your card has available funds</li>
+                    <li>Ensure you entered the correct card details</li>
+                    <li>Contact your bank if you see repeated declines</li>
+                    <li>Try a different payment method if available</li>
+                </ul>
+            </div>
+            
+            <p style="color: #666; margin-top: 30px;">
+                <strong>Still Having Issues?</strong><br>
+                Our team is here to help! Call us at <strong>+254 710 583 101</strong><br>
+                Available 7 AM - 7 PM, Monday to Sunday
+            </p>
+            
+            <p style="color: #999;">
+                <small>Note: If payment is not completed within 30 minutes, your order will be automatically cancelled and you can place a new order anytime.</small>
+            </p>
+            
+            <p>
+                Best regards,<br>
+                <strong>The Denncathy Fresh Basket Team</strong>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Denncathy Fresh Basket. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

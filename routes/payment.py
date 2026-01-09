@@ -12,6 +12,11 @@ from models.user import User
 from models.product import Product
 from models.order import Order
 from models.order_item import OrderItem
+from utils.email_service import (
+    send_order_confirmation_email,
+    send_new_order_alert_to_admin,
+    send_payment_received_email
+)
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -40,15 +45,20 @@ class PesaPalAPI:
         }
         
         try:
+            logger = logging.getLogger(__name__)
             response = requests.post(auth_url, json=payload, headers=headers)
+            logger.info(f"PesaPal Auth status={response.status_code} base_url={self.base_url}")
             if response.status_code == 200:
                 data = response.json()
                 self.auth_token = data.get('token')
+                logger.debug(f"PesaPal token acquired length={len(self.auth_token) if self.auth_token else 0}")
                 return self.auth_token
             else:
+                snippet = (response.text or '')[:200]
+                logger.warning(f"PesaPal Auth failed status={response.status_code} body_snippet={snippet}")
                 return None
         except Exception as e:
-            print(f"Error getting auth token: {e}")
+            logging.getLogger(__name__).error(f"Error getting auth token: {e}")
             return None
     
     def register_ipn_url(self):
@@ -121,13 +131,17 @@ class PesaPalAPI:
         }
         
         try:
+            logger = logging.getLogger(__name__)
             response = requests.post(submit_url, json=order_data, headers=headers)
+            logger.info(f"PesaPal SubmitOrder status={response.status_code} amount={order_data.get('amount')} ref={order_data.get('id')}")
             if response.status_code == 200:
                 return response.json()
             else:
+                snippet = (response.text or '')[:300]
+                logger.warning(f"SubmitOrder failed status={response.status_code} body_snippet={snippet}")
                 return None
         except Exception as e:
-            print(f"Error submitting order: {e}")
+            logging.getLogger(__name__).error(f"Error submitting order: {e}")
             return None
 
 # Initialize PesaPal API
@@ -138,11 +152,12 @@ def initiate_payment():
     """Initiate payment process"""
     
     try:
+        logger = logging.getLogger(__name__)
         # Get cart items from session (as your app currently uses)
         cart = session.get('cart', {})
-        print(f"Cart items: {cart}")
+        logger.info(f"Initiate payment - cart_items={len(cart)}")
         if not cart:
-            print("Cart is empty, redirecting to home")
+            logger.warning("initiate_payment redirecting home - cart empty or session missing")
             flash('Your cart is empty', 'warning')
             return redirect(url_for('home'))
         
@@ -175,6 +190,7 @@ def initiate_payment():
         
         # For guest users, delivery_details must be present
         if not user and not delivery_details:
+            logger.warning("initiate_payment redirecting home - missing delivery details for guest")
             flash('Please provide delivery details', 'error')
             return redirect(url_for('checkout.checkout_page'))
         
@@ -283,14 +299,24 @@ def initiate_payment():
         }
         
         # Submit order to PesaPal
+        logger.info(
+            f"Submitting order to PesaPal amount={float(total_amount)} ref={order_id} base_url={pesapal_api.base_url} ipn_set={'Y' if pesapal_api.ipn_id else 'N'}"
+        )
         pesapal_response = pesapal_api.submit_order_request(order_data)
         
         # Check if we got a successful response with redirect URL
         if pesapal_response and pesapal_response.get('redirect_url'):
+            logger.info(
+                f"Pesapal accepted order ref={order_id} tracking_id={pesapal_response.get('order_tracking_id')} redirect=...{pesapal_response.get('redirect_url')[:60]}"
+            )
             # Store order tracking ID in the database
             new_order.status = 'payment_initiated'
             new_order.pesapal_tracking_id = pesapal_response.get('order_tracking_id')
             db.session.commit()
+            
+            # Send confirmation emails
+            send_order_confirmation_email(new_order, customer_email)
+            send_new_order_alert_to_admin(new_order)
             
             # Store order info in session (for user-facing redirect, not callback)
             session['current_order_id'] = order_id
@@ -300,6 +326,7 @@ def initiate_payment():
             # Redirect to PesaPal payment page
             return redirect(pesapal_response.get('redirect_url'))
         else:
+            logger.warning(f"Pesapal order init failed for ref={order_id}")
             # If payment fails, delete the order
             db.session.delete(new_order)
             db.session.commit()
@@ -308,6 +335,7 @@ def initiate_payment():
             
     except Exception as e:
         db.session.rollback()
+        logging.getLogger(__name__).error(f"initiate_payment error: {str(e)}", exc_info=True)
         flash(f'An error occurred: {str(e)}', 'danger')
         return redirect(url_for('home'))
 
@@ -368,6 +396,12 @@ def payment_callback():
             try:
                 db.session.commit()
                 logger.info(f"Order {order.id} (ref: {merchant_ref}) status updated to: {payment_status.lower()}")
+                
+                # Send payment confirmation email when payment is completed
+                if payment_status.upper() == 'COMPLETED':
+                    send_payment_received_email(order)
+                    logger.info(f"Payment confirmation email sent for order {order.id}")
+                    
             except Exception as e:
                 logger.error(f"Error updating order status: {str(e)}", exc_info=True)
                 db.session.rollback()

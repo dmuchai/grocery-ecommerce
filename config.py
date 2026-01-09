@@ -41,3 +41,19 @@ class Config:
     SESSION_TYPE = "sqlalchemy"
     SESSION_SQLALCHEMY_TABLE = 'sessions'
     SESSION_PERMANENT = False
+    
+    # Email Configuration (Flask-Mail)
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True') == 'True'
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@denncathy.co.ke')
+    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@denncathy.co.ke')
+    
+    # PesaPal Config
+    PESAPAL_BASE_URL = os.getenv('PESAPAL_BASE_URL', 'https://pay.pesapal.com/v3')
+    PESAPAL_CONSUMER_KEY = os.getenv('PESAPAL_CONSUMER_KEY')
+    PESAPAL_CONSUMER_SECRET = os.getenv('PESAPAL_CONSUMER_SECRET')
+    PESAPAL_IPN_ID = os.getenv('PESAPAL_IPN_ID')
+    PESAPAL_CALLBACK_URL = os.getenv('PESAPAL_CALLBACK_URL')

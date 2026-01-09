@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div style="text-align: center; padding: 60px 20px;">
+                <h1 style="font-size: 48px; color: #dc3545; margin-bottom: 20px;">❌</h1>
+                <h2 style="color: #333; margin-bottom: 20px;">Order Not Found</h2>
+                <p style="color: #666; font-size: 16px; margin-bottom: 30px;">
+                    We couldn't find an order with reference <code style="background-color: #f4f4f4; padding: 5px 10px; border-radius: 3px;">{{ order_ref }}</code>
+                </p>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                    <h5 style="margin-top: 0; color: #333;">What can you do?</h5>
+                    <ul style="text-align: left; color: #666; max-width: 400px; margin: 0 auto;">
+                        <li>Check that you entered the correct order reference number</li>
+                        <li>Order references are in the format: ORDER_XXXXXXXX_1234567890</li>
+                        <li>Check your email for an order confirmation</li>
+                        <li>If you placed an order recently, it may take a few moments to appear in the system</li>
+                    </ul>
+                </div>
+                
+                <div style="background-color: #e3f2fd; border-left: 4px solid #007bff; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
+                    <h6 style="margin-top: 0; color: #0066cc;">Need Help?</h6>
+                    <p style="margin: 10px 0; color: #666;">Contact our customer support team</p>
+                    <p style="margin: 0;">
+                        <strong style="font-size: 18px;">📞 +254 710 583 101</strong><br>
+                        <small style="color: #666;">Monday - Sunday, 7 AM - 7 PM</small>
+                    </p>
+                </div>
+                
+                <a href="/" class="btn btn-primary" style="padding: 12px 30px; font-size: 16px;">
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+        text-decoration: none;
+        color: white;
+    }
+    
+    code {
+        background-color: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}

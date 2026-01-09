@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_session import Session
 from models import db, User, Product, Category, Cart
 from config import Config
+from utils.email_service import mail
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -14,6 +15,9 @@ app.config.from_object(Config)
 # Initialize database and migrations
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# Initialize Flask-Mail
+mail.init_app(app)
 
 # Configure Flask-Session
 app.config['SESSION_SQLALCHEMY'] = db
