@@ -143,10 +143,28 @@ def main():
     
     setup = PesaPalIPNSetup()
     
-    # Your IPN URL (update this to match your domain)
-    ipn_url = "https://denncathy.co.ke/payment/ipn"
+    # Determine environment from PESAPAL_BASE_URL or ask user
+    base_url = os.getenv('PESAPAL_BASE_URL', setup.base_url)
     
-    print(f"📍 Domain: {ipn_url}")
+    # Auto-detect environment and suggest appropriate IPN URL
+    if 'cybqa' in base_url or 'sandbox' in base_url.lower():
+        # Sandbox environment - use localhost
+        default_ipn_url = "http://127.0.0.1:5000/payment/ipn"
+        env_name = "SANDBOX/DEMO"
+    else:
+        # Production environment
+        default_ipn_url = "https://denncathy.co.ke/payment/ipn"
+        env_name = "PRODUCTION"
+    
+    print(f"🌍 Environment: {env_name}")
+    print(f"📍 Suggested IPN URL: {default_ipn_url}")
+    print()
+    
+    # Allow user to override
+    user_input = input(f"Press Enter to use '{default_ipn_url}' or type a different URL: ").strip()
+    ipn_url = user_input if user_input else default_ipn_url
+    
+    print(f"📡 Using IPN URL: {ipn_url}")
     print()
     
     # Option 1: List existing IPNs (commented out for now to focus on registration)

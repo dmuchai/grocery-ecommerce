@@ -1,0 +1,153 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Eggs and Dairy"
+    },
+    {
+      "id": 2,
+      "name": "Vegetables"
+    },
+    {
+      "id": 3,
+      "name": "Fruits"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Eggs 30 pack",
+      "description": "Eggs crate 30 pack",
+      "price": 450.0,
+      "stock": 1000,
+      "image_url": "eggs.jpg",
+      "category_id": 1
+    },
+    {
+      "id": 2,
+      "name": "Pineapples per kg",
+      "description": "Pineapples per Kg (1pc approx 2kg)",
+      "price": 95.0,
+      "stock": 1000,
+      "image_url": "pineapples.jpg",
+      "category_id": 3
+    },
+    {
+      "id": 3,
+      "name": "Tomatoes 20Kg",
+      "description": "Farm Fresh Tomatoes per 20Kg",
+      "price": 1700.0,
+      "stock": 1000,
+      "image_url": "tomatoes.jpg",
+      "category_id": 2
+    },
+    {
+      "id": 4,
+      "name": "Red Onions 20kg",
+      "description": "Fresh red onions per 20Kg bag",
+      "price": 2200.0,
+      "stock": 1000,
+      "image_url": "onions.jpg",
+      "category_id": 2
+    },
+    {
+      "id": 5,
+      "name": "Irish Potatoes 90-95Kg",
+      "description": "Irish Potatoes 90-95Kg",
+      "price": 4500.0,
+      "stock": 1000,
+      "image_url": "potatoes.jpg",
+      "category_id": 2
+    },
+    {
+      "id": 6,
+      "name": "Water Melon per kg",
+      "description": "Farm Fresh Water Melon per Kg (1pc 6-8kg)",
+      "price": 60.0,
+      "stock": 1000,
+      "image_url": "watermelon.jpg",
+      "category_id": 3
+    },
+    {
+      "id": 7,
+      "name": "Pawpaw per kg",
+      "description": "Pawpaw per kg (1 pc approx 1-2kg)",
+      "price": 150.0,
+      "stock": 1000,
+      "image_url": "pawpaw.jpg",
+      "category_id": 3
+    },
+    {
+      "id": 8,
+      "name": "Arrowroot per 20kg",
+      "description": "Farm Fresh Arrowroot per 20kg",
+      "price": 4000.0,
+      "stock": 1000,
+      "image_url": "arrowroot.jpg",
+      "category_id": 2
+    },
+    {
+      "id": 9,
+      "name": "Carrots 20kg",
+      "description": "Carrot per 20kg",
+      "price": 2000.0,
+      "stock": 1000,
+      "image_url": "carrot.jpg",
+      "category_id": 2
+    },
+    {
+      "id": 10,
+      "name": "Matoke- per kg (sold as bunch)",
+      "description": "Matoke per kg (sold as bunch 25-35kg)",
+      "price": 120.0,
+      "stock": 1000,
+      "image_url": "products/matoke2.jpg",
+      "category_id": 2
+    },
+    {
+      "id": 11,
+      "name": "Sweet Potatoes 20kg",
+      "description": "Farm Fresh Sweet Potatoes 20kg bag",
+      "price": 1600.0,
+      "stock": 1000,
+      "image_url": "sweetpotatoes.jpg",
+      "category_id": 2
+    },
+    {
+      "id": 12,
+      "name": "Ripe Bananas 10kg",
+      "description": "Ripe Bananas per 10kg crate",
+      "price": 750.0,
+      "stock": 1000,
+      "image_url": "banana.jpg",
+      "category_id": 3
+    },
+    {
+      "id": 13,
+      "name": "Apples Red Carton",
+      "description": "Crisp Red Apples per carton",
+      "price": 6500.0,
+      "stock": 1000,
+      "image_url": "apples.jpg",
+      "category_id": 3
+    },
+    {
+      "id": 15,
+      "name": "Cabbage",
+      "description": "Farm Fresh cabbage per kg",
+      "price": 40.0,
+      "stock": 1000,
+      "image_url": "products/whitecabbage.png",
+      "category_id": 2
+    },
+    {
+      "id": 16,
+      "name": "Oranges Local 15kg",
+      "description": "Oranges Local 15kg",
+      "price": 1000.0,
+      "stock": 1000,
+      "image_url": "products/local_oranges_1.jpg",
+      "category_id": 3
+    }
+  ]
+}
