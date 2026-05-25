@@ -36,6 +36,11 @@
 - [ ] Update `.env` with production IPN_ID
 - [ ] Test payment flow with small amount
 
+## 🔄 Background Jobs (cPanel Cron)
+- [ ] Set up Cron Job to process the email queue:
+  - [ ] Command: `cd /home/your_username/public_html && /home/your_username/virtualenv/.../bin/python process_emails.py` (adjust path)
+  - [ ] Frequency: Every 5 minutes (`*/5 * * * *`)
+
 ## 🧪 Post-Deployment Testing
 - [ ] Run `python test_production_deployment.py`
 - [ ] Test enhanced registration form

@@ -5,6 +5,7 @@ from flask_session import Session
 from models import db, User, Product, Category, Cart
 from config import Config
 from utils.email_service import mail
+from utils.security import csrf, setup_rate_limiting, setup_security_headers
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -22,6 +23,11 @@ mail.init_app(app)
 # Configure Flask-Session
 app.config['SESSION_SQLALCHEMY'] = db
 Session(app)
+
+# Initialize Security Utilities
+csrf.init_app(app)
+setup_rate_limiting(app)
+setup_security_headers(app)
 
 # Create the sessions table (run only once)
 with app.app_context():

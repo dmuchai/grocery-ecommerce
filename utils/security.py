@@ -1,11 +1,14 @@
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect
+
+csrf = CSRFProtect()
 
 def setup_rate_limiting(app):
     """Configure rate limiting for the application."""
     limiter = Limiter(
-        app,
-        key_func=get_remote_address,
+        get_remote_address,
+        app=app,
         default_limits=["200 per day", "50 per hour"]
     )
     return limiter
@@ -27,7 +30,7 @@ def setup_security_headers(app):
         # HTTPS redirect (uncomment in production)
         # response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         
-        # Content Security Policy (basic - customize as needed)
-        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+        # Content Security Policy (relaxed to allow CDNs)
+        response.headers['Content-Security-Policy'] = "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;"
         
         return response

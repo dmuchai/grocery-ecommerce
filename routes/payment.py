@@ -12,11 +12,8 @@ from models.user import User
 from models.product import Product
 from models.order import Order
 from models.order_item import OrderItem
-from utils.email_service import (
-    send_order_confirmation_email,
-    send_new_order_alert_to_admin,
-    send_payment_received_email
-)
+from models.email_queue import EmailQueue
+from utils.security import csrf
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -314,9 +311,9 @@ def initiate_payment():
             new_order.pesapal_tracking_id = pesapal_response.get('order_tracking_id')
             db.session.commit()
             
-            # Send confirmation emails
-            send_order_confirmation_email(new_order, customer_email)
-            send_new_order_alert_to_admin(new_order)
+            # Emails deferred to payment callback (IPN/Success)
+            # send_order_confirmation_email(new_order, customer_email)
+            # send_new_order_alert_to_admin(new_order)
             
             # Store order info in session (for user-facing redirect, not callback)
             session['current_order_id'] = order_id
@@ -340,6 +337,7 @@ def initiate_payment():
         return redirect(url_for('home'))
 
 @payment_bp.route('/callback')
+@csrf.exempt
 def payment_callback():
     """
     Handle payment callback from PesaPal
@@ -397,10 +395,39 @@ def payment_callback():
                 db.session.commit()
                 logger.info(f"Order {order.id} (ref: {merchant_ref}) status updated to: {payment_status.lower()}")
                 
-                # Send payment confirmation email when payment is completed
+                # Enqueue email jobs instead of sending directly
                 if payment_status.upper() == 'COMPLETED':
-                    send_payment_received_email(order)
-                    logger.info(f"Payment confirmation email sent for order {order.id}")
+                    # 1. Order Confirmation (Customer)
+                    queue_item_1 = EmailQueue(
+                        order_id=order.id,
+                        email_type='order_confirmation',
+                        recipient=order.email,
+                        status='pending'
+                    )
+                    db.session.add(queue_item_1)
+
+                    # 2. Admin Alert
+                    queue_item_2 = EmailQueue(
+                        order_id=order.id,
+                        email_type='new_order_admin',
+                        recipient='admin@denncathy.co.ke', # Will be resolved by worker
+                        status='pending'
+                    )
+                    db.session.add(queue_item_2)
+
+                    # 3. Payment Received (Customer)
+                    queue_item_3 = EmailQueue(
+                        order_id=order.id,
+                        email_type='payment_received',
+                        recipient=order.email,
+                        status='pending'
+                    )
+                    db.session.add(queue_item_3)
+                    
+                    logger.info(f"Queued 3 emails for order {order.id}")
+                    db.session.commit()
+
+
                     
             except Exception as e:
                 logger.error(f"Error updating order status: {str(e)}", exc_info=True)
@@ -431,6 +458,7 @@ def payment_callback():
         return "Error", 200  # Still return 200 to PesaPal to prevent retries
 
 @payment_bp.route('/ipn', methods=['GET', 'POST'])
+@csrf.exempt
 def payment_ipn():
     """Handle Instant Payment Notifications from PesaPal"""
     order_tracking_id = request.args.get('OrderTrackingId')

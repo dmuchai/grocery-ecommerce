@@ -12,7 +12,7 @@ $(document).ready(function () {
         } else {
             cartBadge.text('0').hide();
         }
-        
+
         // Also update sticky cart count if it exists
         const stickyCartBadge = $('#sticky-cart-count');
         if (stickyCartBadge.length) {
@@ -52,7 +52,7 @@ $(document).ready(function () {
                             </div>
                             <span>Kshs ${itemTotal}</span>
                         </li>`;
-                    
+
                     miniCartHtml += `
                         <li class="list-group-item d-flex justify-content-between align-items-center py-2">
                             <div class="flex-grow-1">
@@ -66,7 +66,7 @@ $(document).ready(function () {
 
             $('#sticky-cart-items').html(html);
             $('#sticky-cart-total').text(`Kshs ${total.toFixed(2)}`);
-            
+
             // Update mini cart
             $('#mini-cart-items').html(miniCartHtml);
             $('#mini-cart-total').text(`Kshs ${total.toFixed(2)}`);
@@ -77,7 +77,7 @@ $(document).ready(function () {
     function showMiniCart() {
         const miniCart = $('#mini-cart');
         miniCart.fadeIn(300);
-        
+
         // Auto-hide after 5 seconds
         setTimeout(() => {
             miniCart.fadeOut(300);
@@ -85,7 +85,7 @@ $(document).ready(function () {
     }
 
     // Mini cart close button
-    $('#close-mini-cart').on('click', function() {
+    $('#close-mini-cart').on('click', function () {
         $('#mini-cart').fadeOut(300);
     });
 
@@ -93,7 +93,7 @@ $(document).ready(function () {
     $(document).on('click', '.add-to-cart', function () {
         const productId = $(this).data('id');
         let quantity = $(this).data('quantity') || 1;
-        
+
         // Check for product-specific quantity input first (products/category pages)
         const productQtyInput = $(`#qty-${productId}`);
         if (productQtyInput.length && productQtyInput.val()) {
@@ -106,9 +106,9 @@ $(document).ready(function () {
                 quantity = parseInt(quantityInput.val()) || 1;
             }
         }
-        
+
         const button = $(this);
-        
+
         // Disable button and show loading state
         button.prop('disabled', true);
         const originalText = button.html();
@@ -117,6 +117,7 @@ $(document).ready(function () {
         $.ajax({
             type: 'POST',
             url: '/cart/add',
+            headers: { "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') },
             contentType: 'application/json',
             data: JSON.stringify({ product_id: productId, quantity }),
             success: function (response) {
@@ -128,30 +129,30 @@ $(document).ready(function () {
                 // Show success feedback
                 button.removeClass('btn-primary').addClass('btn-success');
                 button.html('<i class="bi bi-check-lg me-2"></i>Added!');
-                
+
                 // Show toast notification with quantity info
-                const message = quantity > 1 ? 
-                    `${quantity} items added to cart` : 
+                const message = quantity > 1 ?
+                    `${quantity} items added to cart` :
                     (response.message || 'Item added to cart');
                 $('#toast-message').text(message);
                 new bootstrap.Toast(document.getElementById('cart-toast')).show();
-                
+
                 // Add visual animation to cart icon
                 $('.cart-badge').addClass('cart-update-animation');
                 setTimeout(() => {
                     $('.cart-badge').removeClass('cart-update-animation');
                 }, 800);
-                
+
                 // Show mini cart preview
                 setTimeout(() => {
                     showMiniCart();
                 }, 500);
-                
+
                 // Reset quantity input to 1 for products/category pages
                 if (productQtyInput.length) {
                     productQtyInput.val(1);
                 }
-                
+
                 // Reset button after 2 seconds
                 setTimeout(() => {
                     button.prop('disabled', false);
@@ -163,13 +164,13 @@ $(document).ready(function () {
                 // Reset button on error
                 button.prop('disabled', false);
                 button.html(originalText);
-                
+
                 // Add shake animation for error
                 $('.cart-badge').addClass('cart-shake');
                 setTimeout(() => {
                     $('.cart-badge').removeClass('cart-shake');
                 }, 500);
-                
+
                 $('#toast-message').text(xhr.responseJSON?.error || 'An error occurred.');
                 new bootstrap.Toast(document.getElementById('cart-toast')).show();
             }
@@ -181,7 +182,7 @@ $(document).ready(function () {
         $.get('/cart/count', function (data) {
             updateCartCount(data.cart_count || 0);
             updateCartTotal(data.total || 0);
-        }).fail(function() {
+        }).fail(function () {
             console.warn('Failed to sync cart data');
         });
     }
@@ -194,7 +195,7 @@ $(document).ready(function () {
     setInterval(syncCartData, 30000);
 
     // Sync when page becomes visible again (user switches back to tab)
-    document.addEventListener('visibilitychange', function() {
+    document.addEventListener('visibilitychange', function () {
         if (!document.hidden) {
             syncCartData();
             loadStickyCart();
@@ -202,14 +203,14 @@ $(document).ready(function () {
     });
 
     // Quantity control handlers for products and category pages
-    $(document).on('click', '.increase-qty', function() {
+    $(document).on('click', '.increase-qty', function () {
         const productId = $(this).data('id');
         const qtyInput = $(`#qty-${productId}`);
         let currentQty = parseInt(qtyInput.val()) || 1;
         qtyInput.val(currentQty + 1);
     });
 
-    $(document).on('click', '.decrease-qty', function() {
+    $(document).on('click', '.decrease-qty', function () {
         const productId = $(this).data('id');
         const qtyInput = $(`#qty-${productId}`);
         let currentQty = parseInt(qtyInput.val()) || 1;

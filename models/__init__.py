@@ -9,3 +9,4 @@ from models.category import Category
 from models.order import Order
 from models.order_item import OrderItem
 from models.cart import Cart
+from models.email_queue import EmailQueue
