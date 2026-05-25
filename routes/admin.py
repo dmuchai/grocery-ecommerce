@@ -386,4 +386,121 @@ def admin_delete_category(category_id):
         flash(f'Error deleting category: {str(e)}', 'error')
         db.session.rollback()
     
-    return redirect(url_for('admin.admin_categories'))
+# Order Management Routes
+@admin_bp.route('/orders')
+@admin_required
+def admin_orders():
+    """Admin orders management page."""
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '', type=str)
+    status_filter = request.args.get('status', '', type=str)
+    
+    # Build query
+    query = Order.query.order_by(Order.created_at.desc())
+    
+    if search:
+        query = query.filter(
+            (Order.merchant_reference.contains(search)) |
+            (Order.email.contains(search)) |
+            (Order.customer_name.contains(search)) |
+            (Order.items.any(OrderItem.product_id.in_(
+                db.select(Product.id).where(Product.name.contains(search))
+            )))
+        )
+    
+    if status_filter:
+        query = query.filter(Order.status == status_filter)
+    
+    # Paginate results
+    orders = query.paginate(
+        page=page, per_page=15, error_out=False
+    )
+    
+    current_user = db.session.get(User, session['user_id'])
+    
+    return render_template('admin/orders.html', 
+                         orders=orders, 
+                         search=search,
+                         status_filter=status_filter,
+                         current_user=current_user)
+
+@admin_bp.route('/orders/<int:order_id>')
+@admin_required
+def admin_view_order(order_id):
+    """View order details."""
+    order = Order.query.get_or_404(order_id)
+    current_user = db.session.get(User, session['user_id'])
+    
+    return render_template('admin/view_order.html', 
+                         order=order, 
+                         current_user=current_user)
+
+@admin_bp.route('/orders/<int:order_id>/update-status', methods=['POST'])
+@admin_required
+def admin_update_order_status(order_id):
+    """Update order status."""
+    try:
+        order = Order.query.get_or_404(order_id)
+        new_status = request.form.get('status')
+        
+        if not new_status:
+            flash('Status is required', 'error')
+            return redirect(url_for('admin.admin_view_order', order_id=order_id))
+            
+        old_status = order.status
+        order.status = new_status
+        db.session.commit()
+        
+        # Trigger email notifications based on status change
+        # Import here to avoid circular imports if any
+        from utils.email_service import (
+            send_order_shipped_email,
+            send_order_cancelled_email,
+            send_payment_received_email
+        )
+        
+        if new_status == 'shipped' and old_status != 'shipped':
+            send_order_shipped_email(order)
+            flash('Order marked as shipped and email sent.', 'success')
+            
+        elif new_status == 'cancelled' and old_status != 'cancelled':
+            send_order_cancelled_email(order)
+            flash('Order cancelled and email sent.', 'success')
+            
+        elif new_status == 'completed' and old_status != 'completed':
+            # Assuming 'completed' means payment completed/delivered depending on business logic
+            # If it's pure payment completion:
+            send_payment_received_email(order)
+            flash('Order marked as completed.', 'success')
+            
+        else:
+            flash(f('Order status updated to {new_status}.', 'success'))
+            
+    except Exception as e:
+        flash(f'Error updating status: {str(e)}', 'error')
+        db.session.rollback()
+        
+    return redirect(url_for('admin.admin_view_order', order_id=order_id))
+
+
+@admin_bp.route('/orders/<int:order_id>/edit', methods=['POST'])
+@admin_required
+def admin_edit_order_details(order_id):
+    """Edit order customer details (Address/Contact)."""
+    try:
+        order = Order.query.get_or_404(order_id)
+        
+        # Update editable fields
+        order.customer_name = request.form.get('customer_name')
+        order.email = request.form.get('email')
+        order.address = request.form.get('address')
+        # Add other fields as necessary if they exist on the model and form
+        
+        db.session.commit()
+        flash('Order details updated successfully.', 'success')
+        
+    except Exception as e:
+        flash(f'Error updating order: {str(e)}', 'error')
+        db.session.rollback()
+        
+    return redirect(url_for('admin.admin_view_order', order_id=order_id))

@@ -1,39 +1,32 @@
 # Denncathy Fresh Basket - AI Coding Instructions
 
 ## Project Overview
-Flask-based grocery e-commerce platform with PesaPal payment integration, deployed on Host Africa. Supports both guest shopping (session-based) and authenticated users with optional profile completion.
+This is a Flask-based grocery e-commerce platform integrated with PesaPal payments, deployed on Host Africa. It supports both guest shopping (session-based cart) and authenticated users with optional profile completion.
 
 ## Architecture & Key Components
 
 ### Blueprint-Based Routing
-All routes organized as Flask Blueprints in `routes/`:
-- `user_bp` (`/user`) - Registration, login, profile management
-- `product_bp` (`/products`) - Product listing and details
-- `cart_bp` (`/cart`) - Session-based cart operations
-- `checkout_bp` (`/checkout`) - Multi-step checkout with delivery details
-- `payment_bp` (`/payment`) - PesaPal API v3 integration
-- `order_bp` (`/order`) - Order history and management
-- `admin_bp` (`/admin`) - Admin dashboard with `@admin_required` decorator
-- `search_bp` (`/search`) - Product search and suggestions
+Routes are organized into Flask Blueprints in the `routes/` directory. Key blueprints include:
+- `user_bp` (`/user`): User authentication and profile.
+- `product_bp` (`/products`): Product listings.
+- `cart_bp` (`/cart`): Session and DB-backed cart operations.
+- `checkout_bp` (`/checkout`): Multi-step checkout.
+- `payment_bp` (`/payment`): PesaPal API integration.
+- `admin_bp` (`/admin`): Admin dashboard, protected by `@admin_required`.
 
 ### Database Architecture (SQLAlchemy 2.0)
-**Critical:** Use `db.session.get(Model, id)` instead of deprecated `Model.query.get(id)`.
+Models are defined in `models/`. **Critical:** Always use `db.session.get(Model, id)` for fetching objects by primary key, *not* `Model.query.get(id)`.
+- `User`: Extended with nullable profile fields and `profile_completed` flag.
+- `Product`: Linked to `Category`.
+- `Cart`: Dual system (session-backed for guests, DB-backed for authenticated users).
+- `Order`: Includes `merchant_reference` and `pesapal_tracking_id`.
+- `OrderItem`: Configured for cascade deletion with `Order`.
 
-Models in `models/`:
-- `User` - Extended with optional profile fields (`first_name`, `last_name`, `phone`, `address`, `city`, etc.)
-- `Product` - Linked to `Category` via relationship
-- `Cart` - Session-backed for guests, DB-backed for authenticated users
-- `Order` - Has `merchant_reference` and `pesapal_tracking_id` for payment tracking
-- `OrderItem` - Cascade delete with orders
-
-### Session Management Pattern
-**Dual cart system:**
-- Guest users: `session['cart']` dictionary keyed by product_id (string)
-- Authenticated users: Database `Cart` model
-- Session initialization in `@cart_bp.before_request` generates `session['session_id']` UUID for guests
-
-Example from `routes/cart.py`:
-```python
+### Session Management Pattern (Dual Cart System)
+- **Guest users:** Cart data stored in `session['cart']` as a dictionary, keyed by product ID.
+- **Authenticated users:** Cart data stored in the database via the `Cart` model.
+- A `session['session_id']` (UUID) is generated in `@cart_bp.before_request` for guest sessions.
+```grocery-ecommerce/routes/cart.py#L9-13
 @cart_bp.before_request
 def initialize_cart():
     if 'session_id' not in session:
@@ -45,111 +38,68 @@ def initialize_cart():
 ## Critical Workflows
 
 ### Local Development Setup
+Use the provided script or manual steps:
 ```bash
-# Use automated script (recommended)
 ./setup_local.sh
-
-# Or manual setup
-python3 -m venv venv
-source venv/bin/activate
+# OR
+python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS grocery_db;"
 flask db upgrade
 python3 app.py
 ```
-
-Default admin: `admin@denncathy.com` / `Admin123!`
-
-### Production Deployment (Host Africa)
-- Entry point: `passenger_wsgi.py` (not `wsgi.py`)
-- Environment: Production config via `.env` (never commit credentials)
-- Database: MySQL with PyMySQL connector (`mysql+pymysql://`)
-- Required: `PESAPAL_IPN_ID` must be pre-registered (see `setup_ipn.py`)
+Default admin credentials: `admin@denncathy.com` / `Admin123!`
 
 ### Testing
-Tests split between root-level integration tests (`test_*.py`) and unit tests (`tests/`):
-```bash
-# Run specific test
-python3 test_checkout.py
-
-# Run all tests in tests/ directory
-python -m pytest tests/
-```
+- Run specific integration tests: `python3 test_checkout.py` (e.g., `test_*.py` at root).
+- Run all unit tests: `python -m pytest tests/` (tests within the `tests/` directory).
 
 ## Project-Specific Patterns
 
-### URL Encoding for Product Images
-**Known issue:** Cart URLs can become double-encoded. Always use raw URLs:
-```python
-# CORRECT in routes/cart.py
-'image_url': product.image_url  # Not url_for() or encoded paths
+### URL Handling for Product Images
+Avoid `url_for()` for product image URLs within cart contexts to prevent double-encoding issues. Always use the raw `product.image_url`.
+```grocery-ecommerce/routes/cart.py#L123-124
+# CORRECT:
+'image_url': product.image_url
 ```
 
 ### PesaPal Integration
-Uses class-based API wrapper in `routes/payment.py`:
-- `PesaPalAPI.get_auth_token()` - Must be called before any API operations
-- `PesaPalAPI.submit_order_request()` - Creates payment, returns redirect URL
-- IPN registration is **one-time setup** via `setup_ipn.py`, not per-transaction
+The `PesaPalAPI` class in `routes/payment.py` handles PesaPal interactions.
+- `PesaPalAPI.get_auth_token()`: Must be called before other API operations.
+- `PesaPalAPI.submit_order_request()`: Initiates payment and returns a redirect URL.
+- IPN registration (`PESAPAL_IPN_ID`) is a one-time setup via `setup_ipn.py`.
+Required environment variables: `PESAPAL_CONSUMER_KEY`, `PESAPAL_CONSUMER_SECRET`, `PESAPAL_IPN_ID`, `PESAPAL_BASE_URL`.
 
-**Environment variables required:**
-```bash
-PESAPAL_CONSUMER_KEY=xxx
-PESAPAL_CONSUMER_SECRET=xxx
-PESAPAL_IPN_ID=xxx  # Pre-registered
-PESAPAL_BASE_URL=https://pay.pesapal.com/v3  # Production
-```
-
-### User Model Enhancements
-User has optional profile completion tracking:
-```python
-user.has_complete_profile()  # Checks first_name, last_name, phone, address, city
-user.update_profile_completion()  # Sets profile_completed boolean
-user.get_full_name()  # Returns formatted name or username fallback
-```
-
-### Admin Authentication Pattern
-Use decorators from `routes/admin.py`:
-```python
+### Admin Authentication
+Use the `@admin_required` decorator from `routes/admin.py` to protect admin-only routes.
+```grocery-ecommerce/routes/admin.py#L18-21
 @admin_bp.route('/dashboard')
 @admin_required
 def dashboard():
-    # Only admin role users can access
+    # Admin-only logic
 ```
-
-### Error Handling
-Global error handlers in `utils/error_handlers.py`:
-- Renders custom templates from `templates/errors/`
-- Always `db.session.rollback()` on 500 errors
-- Logging configured with rotation in `setup_logging()`
 
 ### Configuration Management
-`config.py` uses environment variables with **no defaults** for sensitive values:
-```python
-SECRET_KEY = os.getenv("SECRET_KEY")  # Raises ValueError if missing
-DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")  # Required
-```
-
-Password encoding for MySQL special characters:
-```python
-DB_PASSWORD_ENCODED = urllib.parse.quote_plus(DATABASE_PASSWORD)
+`config.py` uses `os.getenv()` without defaults for sensitive settings, raising `ValueError` if missing.
+MySQL passwords with special characters must be URL-encoded using `urllib.parse.quote_plus()`.
+```grocery-ecommerce/config.py#L10-11
+SECRET_KEY = os.getenv("SECRET_KEY") # Will raise ValueError if missing
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 ```
 
 ## Common Gotchas
-
-1. **SQLAlchemy 2.0 Migration**: All code updated to use `db.session.get()` - do not revert to `.query.get()`
-2. **Session Configuration**: Flask-Session uses SQLAlchemy backend (`SESSION_TYPE = "sqlalchemy"`)
-3. **Image URL Issues**: Never apply `url_for()` to product image URLs in cart operations
-4. **Profile Optional Fields**: User model has nullable profile fields - always check before display
-5. **Guest vs Authenticated Cart**: Always check `session.get('user_id')` to determine cart source
+1.  **SQLAlchemy 2.0 Migration**: Use `db.session.get()` for fetching by ID.
+2.  **Image URL Issues**: Never apply `url_for()` to `product.image_url` in cart operations.
+3.  **Guest vs. Authenticated Cart**: Always check `session.get('user_id')` to determine the active cart mechanism.
+4.  **Profile Fields**: User profile fields are nullable; check for `None` before displaying.
 
 ## Documentation References
 - Local setup: `RUN_LOCALLY.md`
 - Deployment: `DEPLOYMENT_GUIDE.md`
-- PesaPal integration: `PESAPAL_SETUP.md`, `IPN_SETUP_GUIDE.md`
+- PesaPal: `PESAPAL_SETUP.md`, `IPN_SETUP_GUIDE.md`
 - Known issues: `ERROR_FIXES_SUMMARY.md`, `CREDENTIAL_ISSUES.md`
 
 ## When Making Changes
-- Always update both session-based and DB-based cart logic if modifying cart behavior
-- Test PesaPal integration in sandbox before production deployment
-- Run database migrations before deploying model changes
-- Check `test_production_deployment.py` for production readiness checks
+- Any modifications to cart behavior must address both session-based (guest) and DB-based (authenticated) logic.
+- Run `flask db upgrade` after model changes.
+- Verify PesaPal integration in a sandbox environment before production.
