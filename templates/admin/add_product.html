@@ -26,6 +26,7 @@
             </div>
             <div class="card-body">
                 <form method="POST" enctype="multipart/form-data" id="productForm">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>

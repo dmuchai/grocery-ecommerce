@@ -24,6 +24,7 @@
                         <!-- Search Bar -->
                         <div class="hero-search mb-4 animate-slide-up">
                             <form action="/search" method="GET" class="d-flex">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <div class="input-group input-group-lg">
                                     <input type="text" class="form-control" name="q" 
                                            placeholder="Search for vegetables, fruits, eggs and dairy..." 

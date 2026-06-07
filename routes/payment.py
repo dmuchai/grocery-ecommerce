@@ -11,6 +11,8 @@ from models.user import User
 from models.product import Product
 from models.order import Order
 from models.order_item import OrderItem
+from config_pesapal import PESAPAL_CONFIG
+from utils.security import csrf
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -310,6 +312,7 @@ def initiate_payment():
         return redirect(url_for('home'))
 
 @payment_bp.route('/callback')
+@csrf.exempt
 def payment_callback():
     """Handle payment callback from PesaPal"""
     order_tracking_id = request.args.get('OrderTrackingId')
@@ -355,8 +358,10 @@ def payment_callback():
     return redirect(url_for('home'))
 
 @payment_bp.route('/ipn', methods=['GET', 'POST'])
-def payment_ipn():
-    """Handle Instant Payment Notifications from PesaPal"""
+@csrf.exempt
+def pesapal_ipn():
+    """
+    PesaPal Instant Payment Notification (IPN) endpointm PesaPal"""
     order_tracking_id = request.args.get('OrderTrackingId')
     order_merchant_reference = request.args.get('OrderMerchantReference')
     

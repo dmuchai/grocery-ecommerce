@@ -47,63 +47,72 @@
                 </div>
                 <div class="card-body">
                     <form id="checkout-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="row">
                             <div class="col-md-12 mb-3">
-                                <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" 
-                                       value="{% if user %}{{ user.get_full_name() }}{% endif %}" required>
+                                <label for="full_name" class="form-label">Full Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="full_name" name="full_name"
+                                    value="{% if user %}{{ user.get_full_name() }}{% endif %}" required>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="email" name="email" 
-                                       value="{% if user %}{{ user.email }}{% endif %}" required>
+                                <label for="email" class="form-label">Email Address <span
+                                        class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="{% if user %}{{ user.email }}{% endif %}" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" id="phone" name="phone" 
-                                       value="{% if user and user.phone %}{{ user.phone }}{% endif %}"
-                                       placeholder="e.g., +254701234567" required>
+                                <label for="phone" class="form-label">Phone Number <span
+                                        class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                    value="{% if user and user.phone %}{{ user.phone }}{% endif %}"
+                                    placeholder="e.g., +254701234567" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="address" class="form-label">Delivery Address <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="address" name="address" 
-                                   value="{% if user and user.address %}{{ user.address }}{% endif %}"
-                                   placeholder="Street address, apartment, building, etc." required>
+                            <label for="address" class="form-label">Delivery Address <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="address" name="address"
+                                value="{% if user and user.address %}{{ user.address }}{% endif %}"
+                                placeholder="Street address, apartment, building, etc." required>
                             <div class="form-text">Please provide a complete address for accurate delivery</div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-8 mb-3">
                                 <label for="city" class="form-label">City <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="city" name="city" 
-                                       value="{% if user and user.city %}{{ user.city }}{% endif %}"
-                                       placeholder="e.g., Nairobi, Mombasa, Kisumu" required>
+                                <input type="text" class="form-control" id="city" name="city"
+                                    value="{% if user and user.city %}{{ user.city }}{% endif %}"
+                                    placeholder="e.g., Nairobi, Mombasa, Kisumu" required>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="postal_code" class="form-label">Postal Code</label>
-                                <input type="text" class="form-control" id="postal_code" name="postal_code" 
-                                       value="{% if user and user.postal_code %}{{ user.postal_code }}{% endif %}"
-                                       placeholder="e.g., 00100">
+                                <input type="text" class="form-control" id="postal_code" name="postal_code"
+                                    value="{% if user and user.postal_code %}{{ user.postal_code }}{% endif %}"
+                                    placeholder="e.g., 00100">
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label for="delivery_instructions" class="form-label">Delivery Instructions (Optional)</label>
-                            <textarea class="form-control" id="delivery_instructions" name="delivery_instructions" 
-                                      rows="3" placeholder="Any special instructions for delivery (e.g., gate code, landmarks, preferred time)"></textarea>
+                            <label for="delivery_instructions" class="form-label">Delivery Instructions
+                                (Optional)</label>
+                            <textarea class="form-control" id="delivery_instructions" name="delivery_instructions"
+                                rows="3"
+                                placeholder="Any special instructions for delivery (e.g., gate code, landmarks, preferred time)"></textarea>
                         </div>
 
                         <!-- Save to Profile Option -->
                         <div class="mb-4">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="save_to_profile" name="save_to_profile" value="true">
+                                <input class="form-check-input" type="checkbox" id="save_to_profile"
+                                    name="save_to_profile" value="true">
                                 <label class="form-check-label" for="save_to_profile">
-                                    <i class="fas fa-user-plus me-2"></i>Save delivery details to my profile for faster checkout next time
+                                    <i class="fas fa-user-plus me-2"></i>Save delivery details to my profile for faster
+                                    checkout next time
                                 </label>
                             </div>
                         </div>
@@ -137,14 +146,14 @@
                             <p class="mt-2 text-muted">Loading order summary...</p>
                         </div>
                     </div>
-                    
+
                     <hr>
-                    
+
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Total Amount:</h5>
                         <h5 class="mb-0 text-primary" id="total-price">KES 0.00</h5>
                     </div>
-                    
+
                     <div class="mt-3 p-3 bg-light rounded">
                         <small class="text-muted">
                             <i class="fas fa-info-circle me-1"></i>
@@ -153,7 +162,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Delivery Info Summary -->
             <div class="card mt-3">
                 <div class="card-header">
@@ -177,25 +186,25 @@
 
 {% block scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Fetch cart data and populate order summary
-    fetch('/cart-data')
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to fetch cart data');
-        return response.json();
-    })
-    .then(data => {
-        const orderSummaryContent = document.getElementById("order-summary-content");
-        let total = 0;
-        
-        if (data.items && data.items.length > 0) {
-            let summaryHTML = '<div class="list-group list-group-flush">';
-            
-            data.items.forEach(item => {
-                const subtotal = item.price * item.quantity;
-                total += subtotal;
-                
-                summaryHTML += `
+    document.addEventListener("DOMContentLoaded", function () {
+        // Fetch cart data and populate order summary
+        fetch('/cart-data')
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch cart data');
+                return response.json();
+            })
+            .then(data => {
+                const orderSummaryContent = document.getElementById("order-summary-content");
+                let total = 0;
+
+                if (data.items && data.items.length > 0) {
+                    let summaryHTML = '<div class="list-group list-group-flush">';
+
+                    data.items.forEach(item => {
+                        const subtotal = item.price * item.quantity;
+                        total += subtotal;
+
+                        summaryHTML += `
                     <div class="list-group-item d-flex justify-content-between align-items-center px-0">
                         <div class="d-flex align-items-center">
                             <img src="${item.image_url}" alt="${item.name}" 
@@ -208,103 +217,111 @@ document.addEventListener("DOMContentLoaded", function () {
                         <span class="fw-bold">KES ${subtotal.toFixed(2)}</span>
                     </div>
                 `;
+                    });
+
+                    summaryHTML += '</div>';
+                    orderSummaryContent.innerHTML = summaryHTML;
+                } else {
+                    // Redirect to cart if empty
+                    orderSummaryContent.innerHTML = '<p class="text-center text-muted">Your cart is empty</p>';
+                    setTimeout(() => {
+                        window.location.href = '/cart/';
+                    }, 2000);
+                }
+
+                document.getElementById("total-price").textContent = `KES ${total.toFixed(2)}`;
+            })
+            .catch(error => {
+                console.error("Error loading cart data:", error);
+                document.getElementById("order-summary-content").innerHTML =
+                    '<div class="alert alert-danger">Failed to load order summary. Please refresh the page.</div>';
             });
-            
-            summaryHTML += '</div>';
-            orderSummaryContent.innerHTML = summaryHTML;
-        } else {
-            // Redirect to cart if empty
-            orderSummaryContent.innerHTML = '<p class="text-center text-muted">Your cart is empty</p>';
-            setTimeout(() => {
-                window.location.href = '/cart/';
-            }, 2000);
-        }
 
-        document.getElementById("total-price").textContent = `KES ${total.toFixed(2)}`;
-    })
-    .catch(error => {
-        console.error("Error loading cart data:", error);
-        document.getElementById("order-summary-content").innerHTML = 
-            '<div class="alert alert-danger">Failed to load order summary. Please refresh the page.</div>';
-    });
+        // Handle checkout form submission
+        document.getElementById("checkout-form").addEventListener("submit", function (event) {
+            event.preventDefault();
 
-    // Handle checkout form submission
-    document.getElementById("checkout-form").addEventListener("submit", function (event) {
-        event.preventDefault();
-        
-        const submitBtn = document.getElementById("proceed-payment-btn");
-        const originalText = submitBtn.innerHTML;
-        
-        // Show loading state
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            const submitBtn = document.getElementById("proceed-payment-btn");
+            const originalText = submitBtn.innerHTML;
 
-        const formData = {
-            full_name: document.getElementById("full_name").value.trim(),
-            email: document.getElementById("email").value.trim(),
-            phone: document.getElementById("phone").value.trim(),
-            address: document.getElementById("address").value.trim(),
-            city: document.getElementById("city").value.trim(),
-            postal_code: document.getElementById("postal_code").value.trim(),
-            delivery_instructions: document.getElementById("delivery_instructions").value.trim(),
-            save_to_profile: document.getElementById("save_to_profile").checked
-        };
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
 
-        fetch('/checkout/', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show success message briefly before redirecting
-                submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Redirecting to Payment...';
-                submitBtn.className = 'btn btn-success btn-lg';
-                
-                // Redirect to payment after a short delay
-                setTimeout(() => {
-                    // Create a form and submit it to trigger PesaPal payment
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/payment/initiate';
-                    document.body.appendChild(form);
-                    form.submit();
-                }, 1000);
-            } else {
-                throw new Error(data.error || 'Unknown error occurred');
-            }
-        })
-        .catch(error => {
-            console.error("Error submitting checkout:", error);
-            
-            // Show error message
-            const errorMsg = error.message || "An error occurred. Please try again.";
-            
-            // Create or update error alert
-            let errorAlert = document.getElementById('error-alert');
-            if (!errorAlert) {
-                errorAlert = document.createElement('div');
-                errorAlert.id = 'error-alert';
-                errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
-                errorAlert.innerHTML = `
+            const formData = {
+                full_name: document.getElementById("full_name").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                address: document.getElementById("address").value.trim(),
+                city: document.getElementById("city").value.trim(),
+                postal_code: document.getElementById("postal_code").value.trim(),
+                delivery_instructions: document.getElementById("delivery_instructions").value.trim(),
+                save_to_profile: document.getElementById("save_to_profile").checked
+            };
+
+            fetch('/checkout/', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message briefly before redirecting
+                        submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Redirecting to Payment...';
+                        submitBtn.className = 'btn btn-success btn-lg';
+
+                        // Redirect to payment after a short delay
+                        setTimeout(() => {
+                            // Create a form and submit it to trigger PesaPal payment
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/payment/initiate';
+
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = 'csrf_token';
+                            csrfInput.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            form.appendChild(csrfInput);
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        }, 1000);
+                    } else {
+                        throw new Error(data.error || 'Unknown error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error submitting checkout:", error);
+
+                    // Show error message
+                    const errorMsg = error.message || "An error occurred. Please try again.";
+
+                    // Create or update error alert
+                    let errorAlert = document.getElementById('error-alert');
+                    if (!errorAlert) {
+                        errorAlert = document.createElement('div');
+                        errorAlert.id = 'error-alert';
+                        errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                        errorAlert.innerHTML = `
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     <span id="error-message"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
-                document.querySelector('.card-body').insertBefore(errorAlert, document.getElementById('checkout-form'));
-            }
-            
-            document.getElementById('error-message').textContent = errorMsg;
-            
-            // Reset button
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-            submitBtn.className = 'btn btn-primary btn-lg';
+                        document.querySelector('.card-body').insertBefore(errorAlert, document.getElementById('checkout-form'));
+                    }
+
+                    document.getElementById('error-message').textContent = errorMsg;
+
+                    // Reset button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.className = 'btn btn-primary btn-lg';
+                });
         });
     });
-});
 </script>
 {% endblock %}

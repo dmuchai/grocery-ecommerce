@@ -25,6 +25,7 @@
         <div class="card shadow">
             <div class="card-body">
                 <form method="GET" class="row g-3">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="col-md-6">
                         <label for="search" class="form-label">Search Products</label>
                         <input type="text" class="form-control" id="search" name="search" 
@@ -221,6 +222,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteForm" method="POST" style="display: inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Delete Product
                     </button>

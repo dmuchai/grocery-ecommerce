@@ -26,6 +26,7 @@
       {% endif %}
 
       <form method="POST" action="{{ url_for('user.register') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <!-- Required Fields -->
         <div class="card mb-4">
           <div class="card-header bg-primary text-white">

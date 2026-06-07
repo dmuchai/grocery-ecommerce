@@ -2,27 +2,30 @@
 <html lang="en">
 
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Denncathy Fresh Basket | Fresh & Organic Groceries{% endblock %}</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-    
+
     <!-- Meta tags for SEO -->
-    <meta name="description" content="Fresh organic groceries delivered to your doorstep. Shop quality fruits, vegetables, and more at Denncathy Fresh Basket.">
+    <meta name="description"
+        content="Fresh organic groceries delivered to your doorstep. Shop quality fruits, vegetables, and more at Denncathy Fresh Basket.">
     <meta name="keywords" content="grocery, fresh, organic, delivery, vegetables, fruits">
     <meta name="author" content="Denncathy Fresh Basket">
 </head>
@@ -37,7 +40,7 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <small>
-                        <i class="bi bi-telephone"></i> +254 710 583 121 | 
+                        <i class="bi bi-telephone"></i> +254 710 583 121 |
                         <i class="bi bi-envelope"></i> sales@denncathy.co.ke
                     </small>
                 </div>
@@ -75,19 +78,26 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-grid"></i> Categories
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/category/vegetables"><i class="bi bi-tree"></i> Vegetables</a></li>
-                            <li><a class="dropdown-item" href="/category/fruits"><i class="bi bi-apple"></i> Fruits</a></li>
-                            <li><a class="dropdown-item" href="/category/eggs-and-dairy"><i class="bi bi-egg"></i> Eggs and Dairy</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/products"><i class="bi bi-bag"></i> All Products</a></li>
+                            <li><a class="dropdown-item" href="/category/vegetables"><i class="bi bi-tree"></i>
+                                    Vegetables</a></li>
+                            <li><a class="dropdown-item" href="/category/fruits"><i class="bi bi-apple"></i> Fruits</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/category/eggs-and-dairy"><i class="bi bi-egg"></i> Eggs
+                                    and Dairy</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/products"><i class="bi bi-bag"></i> All Products</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path.startswith('/products') %}active{% endif %}" href="/products">
+                        <a class="nav-link {% if request.path.startswith('/products') %}active{% endif %}"
+                            href="/products">
                             <i class="bi bi-shop"></i> Products
                         </a>
                     </li>
@@ -95,8 +105,10 @@
 
                 <!-- Search Bar (Hidden on mobile) -->
                 <form class="d-none d-lg-flex mx-3 flex-grow-1" style="max-width: 400px;" action="/search" method="GET">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="input-group">
-                        <input type="text" class="form-control" name="q" placeholder="Search groceries..." aria-label="Search">
+                        <input type="text" class="form-control" name="q" placeholder="Search groceries..."
+                            aria-label="Search">
                         <button class="btn btn-outline-success" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
@@ -109,7 +121,8 @@
                     <li class="nav-item">
                         <a class="nav-link position-relative" href="/cart">
                             <i class="bi bi-cart3 fs-5"></i>
-                            <span class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <span
+                                class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 {{ cart_count }}
                             </span>
                             <span class="d-lg-none ms-1">Cart</span>
@@ -120,16 +133,22 @@
                     {% if is_logged_in %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i> {{ username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/order/history"><i class="bi bi-clock-history"></i> Order History</a></li>
-                            <li><a class="dropdown-item" href="/user/profile"><i class="bi bi-person"></i> Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/order/history"><i class="bi bi-clock-history"></i> Order
+                                    History</a></li>
+                            <li><a class="dropdown-item" href="/user/profile"><i class="bi bi-person"></i> Profile</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li>
                                 <form action="/user/logout" method="post" class="dropdown-item p-0">
-                                    <button type="submit" class="btn btn-link text-decoration-none text-dark w-100 text-start">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit"
+                                        class="btn btn-link text-decoration-none text-dark w-100 text-start">
                                         <i class="bi bi-box-arrow-right"></i> Logout
                                     </button>
                                 </form>
@@ -166,8 +185,8 @@
     </div>
 
     <!-- Floating Cart Quick View -->
-    <div id="mini-cart" class="card shadow-lg position-fixed end-0 bottom-0 m-4" 
-         style="width: 320px; z-index: 1050; display: none; max-height: 400px;">
+    <div id="mini-cart" class="card shadow-lg position-fixed end-0 bottom-0 m-4"
+        style="width: 320px; z-index: 1050; display: none; max-height: 400px;">
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <span><i class="bi bi-cart3 me-2"></i>Cart Preview</span>
             <button type="button" class="btn-close btn-close-white btn-sm" id="close-mini-cart"></button>
@@ -193,45 +212,48 @@
 
     <!-- Footer -->
     <footer class="bg-dark text-white py-5 mt-5">
-  	<div class="container">
-    		<div class="row text-center text-md-start">
-      			<!-- Left: Business Info -->
-      			<div class="col-md-6 mb-4 mb-md-0">
-        			<h5 class="mb-3">Denncathy Fresh Basket</h5>
-        			<p class="mb-1">
-          				<i class="bi bi-geo-alt-fill me-2"></i>
-          				Getathuru Road, Wangige Market, Kenya
-				</p>
-        			<p class="mb-1">
-          				<i class="bi bi-telephone-fill me-2"></i>
-          				+254710583121
-				</p>
-        			<p class="mb-0">
-          				<i class="bi bi-envelope-fill me-2"></i>
-          				sales@denncathy.co.ke
-				</p>
-			</div>
+        <div class="container">
+            <div class="row text-center text-md-start">
+                <!-- Left: Business Info -->
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <h5 class="mb-3">Denncathy Fresh Basket</h5>
+                    <p class="mb-1">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        Getathuru Road, Wangige Market, Kenya
+                    </p>
+                    <p class="mb-1">
+                        <i class="bi bi-telephone-fill me-2"></i>
+                        +254710583121
+                    </p>
+                    <p class="mb-0">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        sales@denncathy.co.ke
+                    </p>
+                </div>
 
-      			<!-- Right: Navigation & Social Links -->
-			<div class="col-md-6 text-md-end">
-				<div class="mb-3">
-					<a href="/about" class="text-white text-decoration-none me-4">About Us</a>
-					<a href="/contact" class="text-white text-decoration-none me-4">Contact Us</a>
-				</div>
-				<div>
-					<a href="https://instagram.com/denncathy_ent" target="_blank" class="text-white text-decoration-none me-3" aria-label="Instagram">
-						<i class="bi bi-instagram fs-5"></i>
-					</a>
-					<a href="https://facebook.com/denncathy" target="_blank" class="text-white text-decoration-none" aria-label="Facebook">
-						<i class="bi bi-facebook fs-5"></i>
-					</a>
-				</div></div>
-		</div>
-		<!-- Bottom note -->
-		<div class="text-center pt-4 mt-4 border-top border-light">
-			<p class="mb-0 small">&copy; 2025 Denncathy Fresh Basket. All rights reserved.</p>
-		</div>
-	</div>
+                <!-- Right: Navigation & Social Links -->
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-3">
+                        <a href="/about" class="text-white text-decoration-none me-4">About Us</a>
+                        <a href="/contact" class="text-white text-decoration-none me-4">Contact Us</a>
+                    </div>
+                    <div>
+                        <a href="https://instagram.com/denncathy_ent" target="_blank"
+                            class="text-white text-decoration-none me-3" aria-label="Instagram">
+                            <i class="bi bi-instagram fs-5"></i>
+                        </a>
+                        <a href="https://facebook.com/denncathy" target="_blank" class="text-white text-decoration-none"
+                            aria-label="Facebook">
+                            <i class="bi bi-facebook fs-5"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Bottom note -->
+            <div class="text-center pt-4 mt-4 border-top border-light">
+                <p class="mb-0 small">&copy; 2025 Denncathy Fresh Basket. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 
 
@@ -239,7 +261,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Custom JavaScript -->
     {% block scripts %}
     <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
@@ -248,11 +270,11 @@
 
     <script>
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Navbar collapse on mobile
             const navLinks = document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)');
             const navbarCollapse = document.querySelector('.navbar-collapse');
-            
+
             navLinks.forEach(link => {
                 link.addEventListener('click', () => {
                     if (window.innerWidth < 992 && navbarCollapse.classList.contains('show')) {
@@ -264,7 +286,7 @@
             // Close mini cart functionality
             const closeMiniCart = document.getElementById('close-mini-cart');
             if (closeMiniCart) {
-                closeMiniCart.addEventListener('click', function() {
+                closeMiniCart.addEventListener('click', function () {
                     document.getElementById('mini-cart').style.display = 'none';
                 });
             }
@@ -274,7 +296,7 @@
         function showToast(message, type = 'success') {
             const toast = document.getElementById('cart-toast');
             const toastMessage = document.getElementById('toast-message');
-            
+
             if (toast && toastMessage) {
                 toastMessage.innerHTML = `<i class="bi bi-check-circle me-2"></i>${message}`;
                 const bsToast = new bootstrap.Toast(toast);
@@ -284,4 +306,5 @@
     </script>
 
 </body>
+
 </html>

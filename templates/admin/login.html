@@ -125,6 +125,7 @@
                         {% endwith %}
 
                         <form method="POST" action="{{ url_for('admin.login_post') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="form-floating mb-3">
                                 <input type="email" class="form-control" id="email" name="email" 
                                        placeholder="admin@example.com" value="{{ email or '' }}" required>

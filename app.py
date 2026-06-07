@@ -11,6 +11,12 @@ app = Flask(__name__)
 # Apply configuration from Config class
 app.config.from_object(Config)
 
+from utils.security import csrf, setup_rate_limiting, setup_security_headers
+
+# Initialize security headers and rate limiting globally
+setup_security_headers(app)
+limiter = setup_rate_limiting(app)
+
 # Initialize database and migrations
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -41,6 +47,15 @@ app.register_blueprint(cart_bp, url_prefix="/cart")
 app.register_blueprint(checkout_bp, url_prefix="/checkout")
 app.register_blueprint(admin_bp, url_prefix="/admin")
 app.register_blueprint(payment_bp, url_prefix="/payment")
+
+# Protect entire app with CSRF definitions
+csrf.init_app(app)
+
+# Exempt rate limiting on static assets
+limiter.exempt(product_bp)
+limiter.exempt(search_bp)
+limiter.exempt(cart_bp)
+limiter.exempt(order_bp)
 
 @app.route("/")
 def home():
