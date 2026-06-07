@@ -10,7 +10,7 @@
         <div class="col-md-3 col-sm-6 mb-4 d-flex align-items-stretch">
             <div class="card product-card h-100">
 		<a href="/products/{{ product.id }}">
-             		<img src="{{ product.image_url or '/static/images/default.jpg' }}"
+              		<img src="{{ product.image_url|normalize_image_url }}"
                      	class="card-img-top product-img"
                      	loading="lazy"
                      	decoding="async"

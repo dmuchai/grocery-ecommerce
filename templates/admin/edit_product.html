@@ -88,7 +88,7 @@
                         <div class="col-md-12">
                             <label class="form-label">Current Image</label>
                             <div class="text-center">
-                                <img src="/static/images/{{ product.image_url }}" alt="{{ product.name }}" 
+                                <img src="{{ product.image_url|normalize_image_url }}" alt="{{ product.name }}" 
                                      class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
                             </div>
                         </div>

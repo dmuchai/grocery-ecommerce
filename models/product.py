@@ -1,4 +1,5 @@
 from models import db
+from utils.image_urls import normalize_image_url
 
 class Product(db.Model):
     """Product Model representing an item in the grocery e-commerce store."""
@@ -22,7 +23,7 @@ class Product(db.Model):
             "description": self.description,
             "price": float(self.price),
             "stock": self.stock,
-            "image_url": f"/static/images/{self.image_url}" if self.image_url else "/static/images/default.jpg",
+            "image_url": normalize_image_url(self.image_url),
             "category_id": self.category_id,
             "category_name": self.category.name if self.category else "Unknown"
         }

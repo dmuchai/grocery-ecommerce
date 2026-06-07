@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template
 from models import db
 from models.product import Product
+from utils.image_urls import normalize_image_url
 
 # Products Blueprint
 product_bp = Blueprint('product', __name__, url_prefix='/products')
@@ -15,7 +16,7 @@ def get_all_products():
                 "name": product.name,
                 "description": product.description,
                 "price": float(product.price),
-                "image_url": f"/static/images/{product.image_url}"
+                "image_url": normalize_image_url(product.image_url)
             } for product in products_data
     ]           
     return render_template('products.html', products=products_list)
@@ -31,7 +32,7 @@ def get_product_by_id(product_id):
             "name": product.name,
             "description": product.description,
             "price": float(product.price),
-            "image_url": f"/static/images/{product.image_url}" if not product.image_url.startswith("/static/") else product.image_url,
+                "image_url": normalize_image_url(product.image_url),
             "in_stock": product.stock > 0
     }
     
@@ -103,6 +104,6 @@ def related_products(product_id):
     return jsonify([{
         'id': p.id,
         'name': p.name,
-        'image_url': f"/static/images/{p.image_url}" if p.image_url else "/static/images/default.jpg",
+        'image_url': normalize_image_url(p.image_url),
         'price': float(p.price)
     } for p in related])

@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchForm = document.getElementById("searchForm");
     const suggestionsBox = document.getElementById("searchSuggestions");
 
+    if (!searchInput || !searchForm || !suggestionsBox) {
+        return;
+    }
+
     let debounceTimer;
     let activeIndex = -1; // Track selected suggestion
 

@@ -91,7 +91,7 @@
 
                 cart.forEach((item) => {
                     let subtotal = item.price * item.quantity;
-                    let imageUrl = `/static/images/${item.image_url}`;
+                    let imageUrl = item.image_url;
 
                     cartHtml += `
                         <div class="row border-bottom py-2">

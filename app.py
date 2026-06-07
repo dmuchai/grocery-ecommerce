@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_session import Session
 from models import db, User, Product, Category, Cart
 from config import Config
+from utils.image_urls import normalize_image_url
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -57,6 +58,8 @@ limiter.exempt(search_bp)
 limiter.exempt(cart_bp)
 limiter.exempt(order_bp)
 
+app.jinja_env.filters['normalize_image_url'] = normalize_image_url
+
 @app.route("/")
 def home():
     user_email = None
@@ -65,19 +68,75 @@ def home():
         user = db.session.get(User, session['user_id'])
         if user:
             user_email = user.email
-    return render_template("index.html", is_logged_in=bool(user_email), user_email=user_email)
+
+    def category_slug(name):
+        return name.lower().replace('&', 'and').replace(' ', '-').replace('--', '-')
+
+    featured_categories = []
+    categories = Category.query.order_by(Category.name.asc()).all()
+    preferred_categories = ["Fruits", "Vegetables", "Eggs and Honey", "Pantry"]
+    categories_by_name = {category.name: category for     category in categories}
+
+    ordered_categories = [
+        categories_by_name[name]
+        for name in preferred_categories
+        if name in categories_by_name
+    ]
+
+    ordered_categories.extend(
+        category for category in categories if category.name not in preferred_categories
+    )
+
+    for category in ordered_categories:
+        products = (
+            Product.query
+            .filter(Product.stock > 0, Product.category_id == category.id)
+            .order_by(Product.id.desc())
+            .limit(3)
+            .all()
+        )
+        if not products:
+            continue
+
+        featured_categories.append({
+            "name": category.name,
+            "slug": category_slug(category.name),
+            "products": [
+                {
+                    "id": product.id,
+                    "name": product.name,
+                    "description": product.description,
+                    "price": float(product.price),
+                    "image_url": normalize_image_url(product.image_url),
+                }
+                for product in products
+            ],
+        })
+
+    return render_template(
+        "index.html",
+        is_logged_in=bool(user_email),
+        user_email=user_email,
+        featured_categories=featured_categories,
+    )
 
 @app.route('/category/<category_name>')
 def category_page(category_name):
-    # Map URL-friendly names to database names
-    category_mapping = {
-        'eggs-and-dairy': 'Eggs and Dairy',
-        'vegetables': 'Vegetables',
-        'fruits': 'Fruits'
-    }
-    
-    # Get the actual category name for database lookup
-    actual_category_name = category_mapping.get(category_name.lower(), category_name.title())
+    # Resolve the incoming slug to an actual Category.name by comparing
+    # a simple slugified form of each category name. This is more robust
+    # than a hardcoded mapping and handles renames like "Eggs and Honey".
+    def _slug(name):
+        return name.lower().replace('&', 'and').replace(' ', '-').replace('--', '-')
+
+    incoming = category_name.lower()
+    actual_category_name = None
+    for c in Category.query.all():
+        if _slug(c.name) == incoming:
+            actual_category_name = c.name
+            break
+    if not actual_category_name:
+        # Fallback: title-case the incoming path
+        actual_category_name = category_name.replace('-', ' ').title()
     
     # Query products based on category
     products = Product.query.filter(Product.category.has(name=actual_category_name)).all()    

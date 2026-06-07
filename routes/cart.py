@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, session, render_template
 from models import db
 from models.product import Product
 from utils.validation import CartItemSchema, validate_json_input
+from utils.image_urls import normalize_image_url
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -50,7 +51,7 @@ def get_cart():
         cart_items.append({
             "id": product.id,
             "name": product.name,
-            "image_url": product.image_url,
+            "image_url": normalize_image_url(product.image_url),
             "price": float(product.price),
             "quantity": item_data['quantity'],
             "subtotal": subtotal
@@ -104,7 +105,7 @@ def add_to_cart():
             cart_dict[product_id_str] = {
                     'id': product.id,
                     'name': product.name,
-                    'image_url': product.image_url,
+                    'image_url': normalize_image_url(product.image_url),
                     'price': float(product.price),
                     'quantity': quantity
             }

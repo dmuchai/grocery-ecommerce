@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template
 from models.product import Product
 from models import db
+from utils.image_urls import normalize_image_url
 
 search_bp = Blueprint('search', __name__, url_prefix='/search')
 
@@ -22,7 +23,7 @@ def search():
             "name": p.name,
             "description": p.description,
             "price": p.price,
-            "image_url": f"/static/images/{p.image_url}" if p.image_url else "/static/images/default.jpg"
+            "image_url": normalize_image_url(p.image_url)
         } for p in results.items]
 
         # ✅ Proper indentation here
@@ -51,6 +52,6 @@ def suggest_products():
     suggestions = [{
         "id": p.id,
         "name": p.name,
-        "image_url": f"/static/images/{p.image_url}" if p.image_url else "/static/images/default.jpg"
+        "image_url": normalize_image_url(p.image_url)
     } for p in results]
     return jsonify(suggestions)
