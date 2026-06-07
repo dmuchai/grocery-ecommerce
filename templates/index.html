@@ -22,7 +22,6 @@
 
                     <div class="hero-search mb-4 animate-slide-up">
                         <form action="/search" method="GET">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="input-group input-group-lg hero-search-group">
                                 <input type="text" class="form-control" name="q"
                                        placeholder="Search tomatoes, bananas, eggs, milk, rice..."
@@ -235,7 +234,13 @@
                                         <span class="featured-badge">{{ category.name }}</span>
                                         <h5>{{ product.name }}</h5>
                                         <p>{{ product.description[:90] if product.description else 'Fresh product available now.' }}</p>
-                                        <div class="featured-price mt-3">Kshs {{ '%.2f'|format(product.price) }}</div>
+                                        <div class="featured-price mt-3">
+                                            {% if product.price is not none %}
+                                                Kshs {{ '%.2f'|format(product.price) }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </a>
                             </div>

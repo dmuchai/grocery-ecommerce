@@ -51,7 +51,7 @@ def get_cart():
         cart_items.append({
             "id": product.id,
             "name": product.name,
-            "image_url": normalize_image_url(product.image_url),
+            "image_url": normalize_image_url(product.image_url or item_data.get('image_url')),
             "price": float(product.price),
             "quantity": item_data['quantity'],
             "subtotal": subtotal
@@ -105,7 +105,7 @@ def add_to_cart():
             cart_dict[product_id_str] = {
                     'id': product.id,
                     'name': product.name,
-                    'image_url': normalize_image_url(product.image_url),
+                    'image_url': product.image_url,
                     'price': float(product.price),
                     'quantity': quantity
             }

@@ -143,36 +143,6 @@ body {
     line-height: 1;
 }
 
-/* Hero Section */
-.hero-section {
-    min-height: 100vh;
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.hero-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, var(--primary-color) 0%, #20c997 100%);
-    opacity: 0.9;
-    z-index: -2;
-}
-
-.hero-bg::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.1;
-    z-index: 1;
-}
-
 .hero-overlay {
     position: relative;
     z-index: 2;
@@ -260,17 +230,6 @@ body {
 
 .category-card:hover .category-overlay {
     background: rgba(0, 0, 0, 0.05);
-}
-
-/* Testimonial Cards */
-.testimonial-card {
-    transition: var(--transition);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.testimonial-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* Product Cards */
@@ -1052,13 +1011,6 @@ main {
 
 .final-cta .btn-light {
     box-shadow: 0 14px 26px rgba(0, 0, 0, 0.16);
-}
-
-.animate-slide-up,
-.animate-slide-up-delay,
-.animate-fade-in,
-.animate-fade-in-delay {
-    will-change: transform, opacity;
 }
 
 @media (max-width: 991.98px) {

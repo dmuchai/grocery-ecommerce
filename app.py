@@ -1,10 +1,12 @@
 import json
+from functools import lru_cache
 from flask import Flask, render_template, session, jsonify, redirect, url_for, flash
 from flask_migrate import Migrate
 from flask_session import Session
 from models import db, User, Product, Category, Cart
 from config import Config
 from utils.image_urls import normalize_image_url
+from utils.slugify import slugify_category
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -60,6 +62,15 @@ limiter.exempt(order_bp)
 
 app.jinja_env.filters['normalize_image_url'] = normalize_image_url
 
+
+@lru_cache(maxsize=1)
+def get_category_slug_map():
+    return {
+        slugify_category(category.name): category.name
+        for category in Category.query.all()
+        if slugify_category(category.name)
+    }
+
 @app.route("/")
 def home():
     user_email = None
@@ -68,9 +79,6 @@ def home():
         user = db.session.get(User, session['user_id'])
         if user:
             user_email = user.email
-
-    def category_slug(name):
-        return name.lower().replace('&', 'and').replace(' ', '-').replace('--', '-')
 
     featured_categories = []
     categories = Category.query.order_by(Category.name.asc()).all()
@@ -100,7 +108,7 @@ def home():
 
         featured_categories.append({
             "name": category.name,
-            "slug": category_slug(category.name),
+            "slug": slugify_category(category.name),
             "products": [
                 {
                     "id": product.id,
@@ -122,18 +130,8 @@ def home():
 
 @app.route('/category/<category_name>')
 def category_page(category_name):
-    # Resolve the incoming slug to an actual Category.name by comparing
-    # a simple slugified form of each category name. This is more robust
-    # than a hardcoded mapping and handles renames like "Eggs and Honey".
-    def _slug(name):
-        return name.lower().replace('&', 'and').replace(' ', '-').replace('--', '-')
-
-    incoming = category_name.lower()
-    actual_category_name = None
-    for c in Category.query.all():
-        if _slug(c.name) == incoming:
-            actual_category_name = c.name
-            break
+    incoming = slugify_category(category_name)
+    actual_category_name = get_category_slug_map().get(incoming)
     if not actual_category_name:
         # Fallback: title-case the incoming path
         actual_category_name = category_name.replace('-', ' ').title()
